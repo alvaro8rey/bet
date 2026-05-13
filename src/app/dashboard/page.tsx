@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { UpcomingEvents } from "@/components/dashboard/UpcomingEvents";
-import { RewardsProgress } from "@/components/dashboard/RewardsProgress";
 import { formatPoints, formatOdds, getSportIcon, getPredictionLabel } from "@/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -44,15 +43,6 @@ export default async function DashboardPage() {
     .eq("status", "pending")
     .order("event_date", { ascending: true })
     .limit(4);
-
-  const { data: nextRewards } = await supabase
-    .from("rewards")
-    .select("id, nombre, puntos_necesarios, categoria, imagen_url")
-    .gt("puntos_necesarios", profile?.points || 0)
-    .order("puntos_necesarios", { ascending: true })
-    .limit(1);
-
-  const nextReward = nextRewards?.[0] ?? null;
 
   const winRate = profile && profile.total_bets > 0
     ? Math.round((profile.won_bets / profile.total_bets) * 100)
@@ -200,14 +190,6 @@ export default async function DashboardPage() {
 
           {/* Right panel — desktop only */}
           <div className="space-y-4">
-            {/* Rewards progress */}
-            {nextReward && (
-              <RewardsProgress
-                currentPoints={profile?.points || 0}
-                nextReward={nextReward}
-              />
-            )}
-
             {/* Recent bets */}
             {recentBets && recentBets.length > 0 && (
               <Card className="p-4">
