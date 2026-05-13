@@ -94,18 +94,22 @@ export function BetModal({ event, prediction, profile, onClose, onSuccess }: Bet
     }
   };
 
-  // Close on Escape
+  // Close on Escape + lock body scroll
   useEffect(() => {
     const handler = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", handler);
+      document.body.style.overflow = "";
+    };
   }, [onClose]);
 
   const predictionTeam = prediction === "home" ? event.home_team : prediction === "away" ? event.away_team : "Empate";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-md bg-surface border border-border rounded-t-2xl sm:rounded-2xl shadow-card-hover animate-slide-up flex flex-col" style={{ maxHeight: "85vh" }}>
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-md bg-surface border border-border rounded-t-2xl sm:rounded-2xl shadow-card-hover animate-slide-up flex flex-col mb-16 sm:mb-0" style={{ maxHeight: "calc(85vh - 64px)" }}>
 
         {/* Header — siempre visible */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
