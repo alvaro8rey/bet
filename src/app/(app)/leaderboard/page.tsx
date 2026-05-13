@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/Card";
 import { formatPoints, getWinRateColor } from "@/utils";
 import { Trophy, Medal } from "lucide-react";
@@ -27,7 +26,6 @@ export default async function LeaderboardPage() {
   };
 
   return (
-    <AppLayout>
       <div className="space-y-6 animate-fade-in">
         <div>
           <h1 className="font-display font-black text-3xl text-text-primary mb-1">Clasificación</h1>
@@ -130,7 +128,6 @@ export default async function LeaderboardPage() {
           </Card>
         )}
       </div>
-    </AppLayout>
   );
 }
 

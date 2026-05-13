@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/Card";
 import { RedeemModal } from "@/components/RedeemModal";
 import { PageLoader } from "@/components/ui/Spinner";
@@ -141,7 +140,6 @@ export default function RewardsPage() {
   const fisicosRewards = rewards.filter((r) => r.categoria === "fisico");
 
   return (
-    <AppLayout>
       <div className="space-y-8 animate-fade-in">
         <div>
           <h1 className="font-display font-black text-3xl text-text-primary mb-1">Premios</h1>
@@ -232,6 +230,5 @@ export default function RewardsPage() {
           />
         )}
       </div>
-    </AppLayout>
   );
 }

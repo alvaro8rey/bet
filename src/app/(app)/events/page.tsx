@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { EventCard } from "@/components/events/EventCard";
 import { BetModal } from "@/components/bets/BetModal";
 import { PageLoader } from "@/components/ui/Spinner";
@@ -64,7 +63,7 @@ export default function EventsPage() {
   };
 
   return (
-    <AppLayout>
+    <>
       <div className="space-y-6">
         <div>
           <h1 className="font-display font-black text-3xl text-text-primary mb-1">Eventos</h1>
@@ -159,7 +158,7 @@ export default function EventsPage() {
           onSuccess={handleBetSuccess}
         />
       )}
-    </AppLayout>
+    </>
   );
 }
 

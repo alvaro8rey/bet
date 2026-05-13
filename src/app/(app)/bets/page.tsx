@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { BetCard } from "@/components/bets/BetCard";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -27,7 +26,6 @@ export default async function BetsPage() {
   const totalLost = resolvedBets.filter((b) => b.status === "lost").reduce((acc, b) => acc + b.amount, 0);
 
   return (
-    <AppLayout>
       <div className="space-y-6 animate-fade-in">
         <div>
           <h1 className="font-display font-black text-3xl text-text-primary mb-1">Mis Apuestas</h1>
@@ -118,7 +116,6 @@ export default async function BetsPage() {
           )}
         </div>
       </div>
-    </AppLayout>
   );
 }
 

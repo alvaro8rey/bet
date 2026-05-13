@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/Card";
 import { RedemptionCard } from "@/components/RedemptionCard";
 import toast from "react-hot-toast";
@@ -121,16 +120,13 @@ export default function AdminRedemptionsPage() {
 
   if (!isAdmin && !loading) {
     return (
-      <AppLayout>
         <div className="text-center py-12">
           <p className="text-text-muted">No tienes acceso a esta página</p>
         </div>
-      </AppLayout>
     );
   }
 
   return (
-    <AppLayout>
       <div className="space-y-6 animate-fade-in">
         <div>
           <h1 className="font-display font-black text-3xl text-text-primary mb-1">Canjes de Premios</h1>
@@ -183,6 +179,5 @@ export default function AdminRedemptionsPage() {
           )}
         </div>
       </div>
-    </AppLayout>
   );
 }

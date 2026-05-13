@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/Card";
 import { formatPoints, formatDate, getWinRateColor } from "@/utils";
 import { LogoutButton } from "@/components/profile/LogoutButton";
@@ -45,7 +44,6 @@ export default async function ProfilePage() {
   });
 
   return (
-    <AppLayout>
       <div className="space-y-6 animate-fade-in">
         {/* Profile header */}
         <Card className="p-6">
@@ -156,7 +154,6 @@ export default async function ProfilePage() {
           </Card>
         )}
       </div>
-    </AppLayout>
   );
 }
 

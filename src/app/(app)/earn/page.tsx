@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/Card";
 import { formatPoints } from "@/utils";
 import { Zap } from "lucide-react";
@@ -20,7 +19,6 @@ export default async function EarnPage() {
   const appId = process.env.NEXT_PUBLIC_MONLIX_APP_ID;
 
   return (
-    <AppLayout>
       <div className="space-y-6 animate-fade-in">
         <div>
           <h1 className="font-display font-black text-3xl text-text-primary mb-1">Ganar Puntos</h1>
@@ -55,7 +53,6 @@ export default async function EarnPage() {
           </Card>
         )}
       </div>
-    </AppLayout>
   );
 }
 

@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/Card";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -27,7 +26,6 @@ export default async function AdminPage() {
   const pendingRedemptions = redemptions?.filter((r) => r.status === "pending").length || 0;
 
   return (
-    <AppLayout>
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-between">
           <div>
@@ -135,7 +133,6 @@ export default async function AdminPage() {
           </div>
         </div>
       </div>
-    </AppLayout>
   );
 }
 

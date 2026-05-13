@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardHeader, CardBody } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -79,7 +78,6 @@ export default function NewEventPage() {
   };
 
   return (
-    <AppLayout>
       <div className="max-w-2xl space-y-6 animate-fade-in">
         <div className="flex items-center gap-3">
           <Link href="/admin">
@@ -185,7 +183,6 @@ export default function NewEventPage() {
           </div>
         </form>
       </div>
-    </AppLayout>
   );
 }
 

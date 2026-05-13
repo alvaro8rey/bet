@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -50,7 +49,6 @@ export default async function DashboardPage() {
     : 0;
 
   return (
-    <AppLayout>
       <div className="space-y-6 animate-fade-in">
         {/* Welcome */}
         <div className="flex items-start justify-between">
@@ -249,7 +247,6 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
-    </AppLayout>
   );
 }
 

@@ -1,30 +1,41 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardHeader, CardBody } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Upload, Trash2 } from "lucide-react";
 
 const CATEGORY_OPTIONS = [
   { value: "digital", label: "Digital" },
   { value: "fisico", label: "Físico" },
 ];
 
-export default function NewRewardPage() {
+interface Reward {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  puntos_necesarios: number;
+  valor_euros: number;
+  categoria: "digital" | "fisico";
+  imagen_url?: string;
+}
+
+export default function EditRewardPage() {
   const router = useRouter();
+  const params = useParams();
   const supabase = createClient();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [reward, setReward] = useState<Reward | null>(null);
 
   const [form, setForm] = useState({
-    id: "",
     nombre: "",
     descripcion: "",
     puntos_necesarios: "",
@@ -32,6 +43,37 @@ export default function NewRewardPage() {
     categoria: "digital" as "digital" | "fisico",
     imagen_url: "",
   });
+
+  useEffect(() => {
+    fetchReward();
+  }, [params.id]);
+
+  const fetchReward = async () => {
+    try {
+      const { data } = await supabase
+        .from("rewards")
+        .select("*")
+        .eq("id", params.id)
+        .single();
+
+      if (data) {
+        setReward(data);
+        setForm({
+          nombre: data.nombre,
+          descripcion: data.descripcion,
+          puntos_necesarios: data.puntos_necesarios.toString(),
+          valor_euros: data.valor_euros.toString(),
+          categoria: data.categoria,
+          imagen_url: data.imagen_url || "",
+        });
+        setImagePreview(data.imagen_url || "");
+      }
+    } catch (error) {
+      toast.error("Error al cargar el premio");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const update = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
@@ -51,42 +93,78 @@ export default function NewRewardPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.nombre || !form.descripcion || !form.puntos_necesarios || !form.valor_euros || !form.imagen_url) {
+    if (!form.nombre || !form.descripcion || !form.puntos_necesarios || !form.valor_euros) {
       toast.error("Rellena todos los campos");
       return;
     }
 
-    setLoading(true);
+    setSaving(true);
     try {
-      const rewardId = parseInt(form.id) || Date.now();
-
-      const { error } = await supabase.from("rewards").insert({
-        id: rewardId,
-        nombre: form.nombre.trim(),
-        descripcion: form.descripcion.trim(),
-        puntos_necesarios: parseInt(form.puntos_necesarios),
-        valor_euros: parseFloat(form.valor_euros),
-        categoria: form.categoria,
-        tipo: form.categoria,
-        imagen_url: form.imagen_url,
-      });
+      const { error } = await supabase
+        .from("rewards")
+        .update({
+          nombre: form.nombre.trim(),
+          descripcion: form.descripcion.trim(),
+          puntos_necesarios: parseInt(form.puntos_necesarios),
+          valor_euros: parseFloat(form.valor_euros),
+          categoria: form.categoria,
+          tipo: form.categoria,
+          imagen_url: form.imagen_url,
+        })
+        .eq("id", params.id);
 
       if (error) {
-        toast.error("Error al crear el premio: " + error.message);
-        setLoading(false);
+        toast.error("Error al actualizar el premio: " + error.message);
         return;
       }
 
-      toast.success("¡Premio creado correctamente!");
+      toast.success("¡Premio actualizado correctamente!");
       router.push("/admin/rewards");
     } catch (error) {
-      toast.error("Error al guardar la imagen o premio");
-      setLoading(false);
+      toast.error("Error al guardar los cambios");
+    } finally {
+      setSaving(false);
     }
   };
 
+  const handleDelete = async () => {
+    if (!confirm("¿Estás seguro de que quieres eliminar este premio?")) return;
+
+    setSaving(true);
+    try {
+      const { error } = await supabase.from("rewards").delete().eq("id", params.id);
+
+      if (error) {
+        toast.error("Error al eliminar el premio: " + error.message);
+        return;
+      }
+
+      toast.success("¡Premio eliminado correctamente!");
+      router.push("/admin/rewards");
+    } catch (error) {
+      toast.error("Error al eliminar el premio");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+        <div className="text-center">
+          <p className="text-text-muted">Cargando...</p>
+        </div>
+    );
+  }
+
+  if (!reward) {
+    return (
+        <div className="text-center">
+          <p className="text-text-muted">Premio no encontrado</p>
+        </div>
+    );
+  }
+
   return (
-    <AppLayout>
       <div className="max-w-2xl space-y-6 animate-fade-in">
         <div className="flex items-center gap-3">
           <Link href="/admin/rewards">
@@ -96,8 +174,8 @@ export default function NewRewardPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="font-display font-black text-3xl text-text-primary">Nuevo Premio</h1>
-            <p className="text-text-muted text-sm">Crea un nuevo premio para los usuarios</p>
+            <h1 className="font-display font-black text-3xl text-text-primary">Editar Premio</h1>
+            <p className="text-text-muted text-sm">{reward.nombre}</p>
           </div>
         </div>
 
@@ -107,18 +185,6 @@ export default function NewRewardPage() {
               <h2 className="font-semibold text-text-primary">Información del premio</h2>
             </CardHeader>
             <CardBody className="space-y-4">
-              {/* ID */}
-              <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">ID (auto)</label>
-                <Input
-                  type="number"
-                  value={form.id}
-                  onChange={(e) => update("id", e.target.value)}
-                  placeholder="Dejar vacío para auto-generar"
-                />
-                <p className="text-xs text-text-muted mt-1">Se genera automáticamente si está vacío</p>
-              </div>
-
               {/* Nombre */}
               <div>
                 <label className="block text-sm font-medium text-text-primary mb-2">Nombre *</label>
@@ -189,7 +255,6 @@ export default function NewRewardPage() {
                     onChange={handleImageChange}
                     className="hidden"
                     id="image-input"
-                    required={!imagePreview}
                   />
                   <label htmlFor="image-input" className="cursor-pointer block">
                     {imagePreview ? (
@@ -221,15 +286,23 @@ export default function NewRewardPage() {
               </Button>
             </Link>
             <button
+              type="button"
+              onClick={handleDelete}
+              disabled={saving}
+              className="px-4 py-2.5 rounded-lg bg-loss/10 hover:bg-loss/20 text-loss font-medium transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              <Trash2 size={16} />
+              Eliminar
+            </button>
+            <button
               type="submit"
-              disabled={loading}
+              disabled={saving}
               className="flex-1 px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-dim text-background font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Creando..." : "Crear Premio"}
+              {saving ? "Guardando..." : "Guardar cambios"}
             </button>
           </div>
         </form>
       </div>
-    </AppLayout>
   );
 }

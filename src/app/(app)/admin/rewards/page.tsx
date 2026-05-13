@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
@@ -32,7 +31,6 @@ export default async function AdminRewardsPage() {
   const fisicosRewards = rewards?.filter((r) => r.categoria === "fisico") || [];
 
   return (
-    <AppLayout>
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-between">
           <div>
@@ -79,7 +77,6 @@ export default async function AdminRewardsPage() {
           )}
         </div>
       </div>
-    </AppLayout>
   );
 }
 
