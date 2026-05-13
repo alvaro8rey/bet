@@ -5,10 +5,11 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { UpcomingEvents } from "@/components/dashboard/UpcomingEvents";
+import { RewardsProgress } from "@/components/dashboard/RewardsProgress";
 import { formatPoints, formatOdds, getSportIcon, getPredictionLabel } from "@/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { TrendingUp, Ticket, Trophy } from "lucide-react";
+import { TrendingUp, TrendingDown, Ticket, Trophy, Target } from "lucide-react";
 import type { Event, Profile } from "@/types";
 
 export default async function DashboardPage() {
@@ -44,6 +45,15 @@ export default async function DashboardPage() {
     .order("event_date", { ascending: true })
     .limit(4);
 
+  const { data: nextRewards } = await supabase
+    .from("rewards")
+    .select("id, nombre, puntos_necesarios, categoria, imagen_url")
+    .gt("puntos_necesarios", profile?.points || 0)
+    .order("puntos_necesarios", { ascending: true })
+    .limit(1);
+
+  const nextReward = nextRewards?.[0] ?? null;
+
   const winRate = profile && profile.total_bets > 0
     ? Math.round((profile.won_bets / profile.total_bets) * 100)
     : 0;
@@ -52,11 +62,18 @@ export default async function DashboardPage() {
     <AppLayout>
       <div className="space-y-6 animate-fade-in">
         {/* Welcome */}
-        <div>
-          <h1 className="font-display font-black text-3xl text-text-primary mb-1">
-            Hola, {profile?.username} 👋
-          </h1>
-          <p className="text-text-muted text-sm">Tu resumen de predicciones</p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="font-display font-black text-3xl text-text-primary mb-1">
+              Hola, {profile?.username} 👋
+            </h1>
+            <p className="text-text-muted text-sm">Tu resumen de predicciones</p>
+          </div>
+          {profile?.is_admin && (
+            <Link href="/admin">
+              <Badge variant="pending">Admin</Badge>
+            </Link>
+          )}
         </div>
 
         {/* Stats grid */}
@@ -76,7 +93,7 @@ export default async function DashboardPage() {
               <div className="w-8 h-8 bg-blue-muted rounded-lg flex items-center justify-center">
                 <Ticket size={16} className="text-blue" />
               </div>
-              <span className="text-text-muted text-xs">Total</span>
+              <span className="text-text-muted text-xs">Total apuestas</span>
             </div>
             <p className="text-text-primary font-bold text-2xl">{profile?.total_bets || 0}</p>
           </Card>
@@ -88,19 +105,35 @@ export default async function DashboardPage() {
               </div>
               <span className="text-text-muted text-xs">Ganadas</span>
             </div>
-            <p className="text-win font-bold text-2xl">{profile?.won_bets || 0}</p>
+            <div className="flex items-end gap-2">
+              <p className="text-win font-bold text-2xl">{profile?.won_bets || 0}</p>
+              {(profile?.lost_bets ?? 0) > 0 && (
+                <p className="text-loss text-sm mb-0.5 flex items-center gap-0.5">
+                  <TrendingDown size={12} />
+                  {profile?.lost_bets}
+                </p>
+              )}
+            </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 bg-pending/10 rounded-lg flex items-center justify-center">
-                <Trophy size={16} className="text-pending" />
+                <Target size={16} className="text-pending" />
               </div>
               <span className="text-text-muted text-xs">% Éxito</span>
             </div>
             <p className="text-pending font-bold text-2xl">{winRate}%</p>
           </Card>
         </div>
+
+        {/* Rewards progress */}
+        {nextReward && (
+          <RewardsProgress
+            currentPoints={profile?.points || 0}
+            nextReward={nextReward}
+          />
+        )}
 
         {/* Active bet */}
         {activeBet ? (
