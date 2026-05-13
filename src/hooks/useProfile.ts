@@ -19,10 +19,21 @@ async function applyBankruptcyResetIfNeeded(
   data: Profile,
   userId: string
 ): Promise<Profile> {
+  // Auto-reset if it's the next day after bankruptcy
   if (data.bankruptcy_at && isNextDay(data.bankruptcy_at)) {
     const { data: updated } = await supabase
       .from("profiles")
       .update({ points: BANKRUPTCY_RESET_POINTS, bankruptcy_at: null })
+      .eq("user_id", userId)
+      .select("*")
+      .single();
+    return updated ?? data;
+  }
+  // Clear bankruptcy_at if the user already has points (e.g. added manually)
+  if (data.bankruptcy_at && data.points > 0) {
+    const { data: updated } = await supabase
+      .from("profiles")
+      .update({ bankruptcy_at: null })
       .eq("user_id", userId)
       .select("*")
       .single();

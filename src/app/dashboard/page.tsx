@@ -123,7 +123,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Bankruptcy banner */}
-        {profile?.bankruptcy_at && (
+        {profile?.bankruptcy_at && profile.points === 0 && (
           <BankruptcyBanner bankruptcyAt={profile.bankruptcy_at} />
         )}
 
