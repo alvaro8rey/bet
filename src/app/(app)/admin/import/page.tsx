@@ -88,9 +88,10 @@ export default function ImportEventsPage() {
 
   const fetchTeamLogo = async (teamName: string): Promise<string | null> => {
     try {
-      const res = await fetch(`https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${encodeURIComponent(teamName)}`);
+      const res = await fetch(`/api/team-logo?team=${encodeURIComponent(teamName)}`);
+      if (!res.ok) return null;
       const data = await res.json();
-      return data.teams?.[0]?.strTeamBadge ?? null;
+      return data.url ?? null;
     } catch {
       return null;
     }
