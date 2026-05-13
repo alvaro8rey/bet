@@ -14,6 +14,7 @@ import {
   Gift,
   User,
   Settings,
+  AlertTriangle,
 } from "lucide-react";
 
 const navItems = [
@@ -68,6 +69,19 @@ export function Sidebar() {
           )}
         </div>
       </div>
+
+      {/* Bankruptcy warning */}
+      {profile?.bankruptcy_at && (
+        <div className="px-4 pb-2">
+          <div className="bg-loss/10 border border-loss/30 rounded-xl p-3 flex items-start gap-2">
+            <AlertTriangle size={14} className="text-loss flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-loss font-semibold text-xs">Sin puntos</p>
+              <p className="text-text-muted text-[10px] mt-0.5">Mañana recibirás 1.000 pts</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-2">

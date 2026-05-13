@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { UpcomingEvents } from "@/components/dashboard/UpcomingEvents";
+import { BankruptcyBanner } from "@/components/dashboard/BankruptcyBanner";
 import { formatPoints, formatOdds, getSportIcon, getPredictionLabel } from "@/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -118,6 +119,11 @@ export default async function DashboardPage() {
             <p className="text-pending font-bold text-2xl">{winRate}%</p>
           </Card>
         </div>
+
+        {/* Bankruptcy banner */}
+        {profile?.bankruptcy_at && (
+          <BankruptcyBanner bankruptcyAt={profile.bankruptcy_at} />
+        )}
 
         {/* Desktop 2-column layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

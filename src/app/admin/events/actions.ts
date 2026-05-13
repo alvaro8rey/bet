@@ -118,13 +118,17 @@ export async function resolveEvent(
         }
 
         // Update user points
+        const newPoints = won ? profile.points + bet.potential_win : profile.points;
         const updateData = won
           ? {
-            points: profile.points + bet.potential_win,
+            points: newPoints,
             won_bets: profile.won_bets + 1,
+            bankruptcy_at: null,
           }
           : {
             lost_bets: profile.lost_bets + 1,
+            // Si el usuario se queda a 0 puntos, registrar bancarrota
+            ...(profile.points === 0 ? { bankruptcy_at: new Date().toISOString() } : {}),
           };
 
         const { error: profileError } = await supabase
@@ -139,7 +143,7 @@ export async function resolveEvent(
 
         profilesByUserId.set(bet.user_id, {
           ...profile,
-          points: updateData.points ?? profile.points,
+          points: newPoints,
           won_bets: updateData.won_bets ?? profile.won_bets,
           lost_bets: updateData.lost_bets ?? profile.lost_bets,
         });

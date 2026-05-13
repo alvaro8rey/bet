@@ -13,6 +13,7 @@ export interface Profile {
   won_bets: number;
   lost_bets: number;
   is_admin: boolean;
+  bankruptcy_at: string | null;
   created_at: string;
   updated_at: string;
 }
