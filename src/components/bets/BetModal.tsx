@@ -105,35 +105,37 @@ export function BetModal({ event, prediction, profile, onClose, onSuccess }: Bet
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-md bg-surface border border-border rounded-t-2xl sm:rounded-2xl shadow-card-hover animate-slide-up flex flex-col max-h-[92dvh] sm:max-h-[90dvh]">
-        {/* Header — always visible */}
-        <div className="flex items-center justify-between p-5 border-b border-border flex-shrink-0">
+      <div className="w-full max-w-md bg-surface border border-border rounded-t-2xl sm:rounded-2xl shadow-card-hover animate-slide-up flex flex-col" style={{ maxHeight: "85vh" }}>
+
+        {/* Header — siempre visible */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
           <div>
             <p className="text-xs text-text-muted font-medium mb-0.5">
               {getSportIcon(event.sport)} {event.competition}
             </p>
-            <h3 className="font-bold text-text-primary">
+            <h3 className="font-semibold text-text-primary text-sm">
               {event.home_team} vs {event.away_team}
             </h3>
           </div>
-          <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors p-1">
+          <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors p-1 ml-2 flex-shrink-0">
             <X size={20} />
           </button>
         </div>
 
-        <div className="p-5 space-y-4 overflow-y-auto overscroll-contain">
+        {/* Contenido scrollable */}
+        <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-3 space-y-3">
           {/* Prediction summary */}
-          <div className="bg-accent-muted border border-accent/20 rounded-xl p-4 flex items-center gap-3">
-            <TrendingUp className="text-accent" size={20} />
-            <div>
+          <div className="bg-accent-muted border border-accent/20 rounded-xl p-3 flex items-center gap-3">
+            <TrendingUp className="text-accent flex-shrink-0" size={18} />
+            <div className="flex-1 min-w-0">
               <p className="text-xs text-text-muted">Tu predicción</p>
-              <p className="text-accent font-bold">
+              <p className="text-accent font-bold text-sm truncate">
                 {getPredictionLabel(prediction)}: {predictionTeam}
               </p>
             </div>
-            <div className="ml-auto text-right">
+            <div className="text-right flex-shrink-0">
               <p className="text-xs text-text-muted">Cuota</p>
-              <p className="text-accent font-bold text-xl">{formatOdds(odds)}</p>
+              <p className="text-accent font-bold text-lg">{formatOdds(odds)}</p>
             </div>
           </div>
 
@@ -165,7 +167,7 @@ export function BetModal({ event, prediction, profile, onClose, onSuccess }: Bet
 
             {/* Quick amounts */}
             {quickAmounts.length > 0 && (
-              <div className="flex gap-2 mt-2">
+              <div className="flex gap-1.5 mt-2">
                 {quickAmounts.map((qa) => (
                   <button
                     key={qa}
@@ -179,37 +181,28 @@ export function BetModal({ event, prediction, profile, onClose, onSuccess }: Bet
             )}
           </div>
 
-          {/* Potential win */}
+          {/* Potential win — compacto */}
           {numAmount > 0 && (
-            <div className="bg-surface-2 rounded-xl p-4 border border-border space-y-2 animate-fade-in">
-              <div className="flex justify-between text-sm">
-                <span className="text-text-muted">Apuesta</span>
-                <span className="text-text-primary font-medium">{formatPoints(numAmount)} pts</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-text-muted">Cuota</span>
-                <span className="text-text-primary font-medium">×{formatOdds(odds)}</span>
-              </div>
-              <div className="h-px bg-border" />
-              <div className="flex justify-between">
-                <span className="text-text-secondary font-medium">Ganancia potencial</span>
+            <div className="bg-surface-2 rounded-xl px-3 py-2.5 border border-border animate-fade-in">
+              <div className="flex justify-between items-center">
+                <span className="text-text-muted text-xs">Ganancia potencial</span>
                 <div className="text-right">
-                  <span className="text-win font-bold text-lg">{formatPoints(potentialWin)} pts</span>
-                  <p className="text-win/60 text-xs">+{formatPoints(profit)} pts beneficio</p>
+                  <span className="text-win font-bold">{formatPoints(potentialWin)} pts</span>
+                  <p className="text-win/60 text-xs">+{formatPoints(profit)} beneficio</p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Warning */}
-          <div className="flex items-start gap-2 text-text-muted bg-surface-2 rounded-xl p-3 border border-border">
-            <AlertCircle size={14} className="mt-0.5 flex-shrink-0" />
-            <p className="text-xs">
-              Solo puedes tener una apuesta activa. Los puntos se descontarán ahora y se añadirán si ganas.
-            </p>
+          {/* Warning — compacto */}
+          <div className="flex items-start gap-2 text-text-muted">
+            <AlertCircle size={13} className="mt-0.5 flex-shrink-0" />
+            <p className="text-xs">Solo puedes tener una apuesta activa. Los puntos se descontarán ahora.</p>
           </div>
+        </div>
 
-          {/* CTA */}
+        {/* Botón — siempre visible en la parte inferior */}
+        <div className="px-4 py-3 border-t border-border flex-shrink-0">
           <Button
             fullWidth
             size="lg"
