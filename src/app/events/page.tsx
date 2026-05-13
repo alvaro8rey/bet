@@ -98,12 +98,12 @@ export default function EventsPage() {
           </div>
 
           {/* Sport filter */}
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          <div className="flex flex-wrap gap-1.5">
             {SPORTS.map((s) => (
               <button
                 key={s.value}
                 onClick={() => setSportFilter(s.value as Sport | "all")}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                   sportFilter === s.value
                     ? "bg-blue-muted border border-blue/30 text-blue"
                     : "bg-surface-2 text-text-muted hover:text-text-secondary border border-border"

@@ -104,10 +104,10 @@ export function BetModal({ event, prediction, profile, onClose, onSuccess }: Bet
   const predictionTeam = prediction === "home" ? event.home_team : prediction === "away" ? event.away_team : "Empate";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-md bg-surface border border-border rounded-2xl shadow-card-hover animate-slide-up">
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-border">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-md bg-surface border border-border rounded-t-2xl sm:rounded-2xl shadow-card-hover animate-slide-up flex flex-col max-h-[92dvh] sm:max-h-[90dvh]">
+        {/* Header — always visible */}
+        <div className="flex items-center justify-between p-5 border-b border-border flex-shrink-0">
           <div>
             <p className="text-xs text-text-muted font-medium mb-0.5">
               {getSportIcon(event.sport)} {event.competition}
@@ -121,7 +121,7 @@ export function BetModal({ event, prediction, profile, onClose, onSuccess }: Bet
           </button>
         </div>
 
-        <div className="p-5 space-y-5">
+        <div className="p-5 space-y-4 overflow-y-auto overscroll-contain">
           {/* Prediction summary */}
           <div className="bg-accent-muted border border-accent/20 rounded-xl p-4 flex items-center gap-3">
             <TrendingUp className="text-accent" size={20} />
