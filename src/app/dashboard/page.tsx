@@ -9,7 +9,7 @@ import { RewardsProgress } from "@/components/dashboard/RewardsProgress";
 import { formatPoints, formatOdds, getSportIcon, getPredictionLabel } from "@/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { TrendingUp, TrendingDown, Ticket, Trophy, Target } from "lucide-react";
+import { TrendingUp, TrendingDown, Ticket, Target } from "lucide-react";
 import type { Event, Profile } from "@/types";
 
 export default async function DashboardPage() {
@@ -36,7 +36,7 @@ export default async function DashboardPage() {
     .eq("user_id", user.id)
     .neq("status", "pending")
     .order("created_at", { ascending: false })
-    .limit(3);
+    .limit(5);
 
   const { data: upcomingEvents } = await supabase
     .from("events")
@@ -67,7 +67,9 @@ export default async function DashboardPage() {
             <h1 className="font-display font-black text-3xl text-text-primary mb-1">
               Hola, {profile?.username} 👋
             </h1>
-            <p className="text-text-muted text-sm">Tu resumen de predicciones · {new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}</p>
+            <p className="text-text-muted text-sm">
+              Tu resumen de predicciones · {new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}
+            </p>
           </div>
           {profile?.is_admin && (
             <Link href="/admin">
@@ -127,107 +129,135 @@ export default async function DashboardPage() {
           </Card>
         </div>
 
-        {/* Rewards progress */}
-        {nextReward && (
-          <RewardsProgress
-            currentPoints={profile?.points || 0}
-            nextReward={nextReward}
-          />
-        )}
+        {/* Desktop 2-column layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Active bet */}
-        {activeBet ? (
-          <Card glow className="p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Badge variant="pending" dot>Apuesta Activa</Badge>
-            </div>
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <p className="text-xs text-text-muted mb-1">
-                  {activeBet.event && getSportIcon(activeBet.event.sport)} {activeBet.event?.competition}
-                </p>
-                <p className="text-text-primary font-semibold mb-3">
-                  {activeBet.event?.home_team} vs {activeBet.event?.away_team}
-                </p>
-                <div className="flex items-center gap-4 text-sm">
-                  <div>
-                    <span className="text-text-muted">Predicción: </span>
-                    <span className="text-accent font-medium">{getPredictionLabel(activeBet.prediction)}</span>
+          {/* Main column */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Active bet */}
+            {activeBet ? (
+              <Card glow className="p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Badge variant="pending" dot>Apuesta Activa</Badge>
+                </div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="text-xs text-text-muted mb-1">
+                      {activeBet.event && getSportIcon(activeBet.event.sport)} {activeBet.event?.competition}
+                    </p>
+                    <p className="text-text-primary font-semibold mb-3">
+                      {activeBet.event?.home_team} vs {activeBet.event?.away_team}
+                    </p>
+                    <div className="flex items-center gap-4 text-sm">
+                      <div>
+                        <span className="text-text-muted">Predicción: </span>
+                        <span className="text-accent font-medium">{getPredictionLabel(activeBet.prediction)}</span>
+                      </div>
+                      <div>
+                        <span className="text-text-muted">Apostado: </span>
+                        <span className="text-text-primary font-medium">{formatPoints(activeBet.amount)} pts</span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-text-muted">Apostado: </span>
-                    <span className="text-text-primary font-medium">{formatPoints(activeBet.amount)} pts</span>
+                  <div className="text-right">
+                    <p className="text-xs text-text-muted mb-1">Ganancia potencial</p>
+                    <p className="text-win font-bold text-xl">{formatPoints(activeBet.potential_win)} pts</p>
+                    <p className="text-xs text-text-muted">Cuota {formatOdds(activeBet.odds)}</p>
                   </div>
                 </div>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-text-muted mb-1">Ganancia potencial</p>
-                <p className="text-win font-bold text-xl">{formatPoints(activeBet.potential_win)} pts</p>
-                <p className="text-xs text-text-muted">Cuota {formatOdds(activeBet.odds)}</p>
-              </div>
-            </div>
-          </Card>
-        ) : (
-          <Card className="p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-text-primary font-semibold mb-1">Sin apuesta activa</p>
-                <p className="text-text-muted text-sm">Realiza tu próxima predicción ahora</p>
-              </div>
-              <Link href="/events">
-                <Button>Ver eventos</Button>
-              </Link>
-            </div>
-          </Card>
-        )}
-
-        {/* Upcoming events */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display font-bold text-xl text-text-primary">Próximos Eventos</h2>
-            <Link href="/events" className="text-accent text-sm font-medium hover:text-accent-dim">Ver todos →</Link>
-          </div>
-
-          {upcomingEvents && upcomingEvents.length > 0 ? (
-            <UpcomingEvents
-              events={upcomingEvents as Event[]}
-              profile={(profile || null) as Profile | null}
-              hasActiveBet={!!activeBet}
-            />
-          ) : (
-            <EmptyState icon="📅" title="No hay eventos próximos" description="El administrador publicará nuevos eventos pronto." />
-          )}
-        </div>
-
-        {/* Recent bets */}
-        {recentBets && recentBets.length > 0 && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display font-bold text-xl text-text-primary">Últimas Apuestas</h2>
-              <Link href="/bets" className="text-accent text-sm font-medium hover:text-accent-dim">Ver todas →</Link>
-            </div>
-            <div className="space-y-2">
-              {recentBets.map((bet) => (
-                <Card key={bet.id} className="p-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-lg">{bet.event && getSportIcon(bet.event.sport)}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-text-primary text-sm font-medium truncate">
-                        {bet.event?.home_team} vs {bet.event?.away_team}
-                      </p>
-                      <p className="text-text-muted text-xs">{getPredictionLabel(bet.prediction)} · {formatPoints(bet.amount)} pts</p>
-                    </div>
-                    <div className="text-right">
-                      {bet.status === "won" && <span className="text-win font-bold text-sm">+{formatPoints(bet.potential_win)}</span>}
-                      {bet.status === "lost" && <span className="text-loss font-bold text-sm">-{formatPoints(bet.amount)}</span>}
-                      {bet.status === "cancelled" && <span className="text-text-muted text-sm">Cancelada</span>}
-                    </div>
+              </Card>
+            ) : (
+              <Card className="p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-text-primary font-semibold mb-1">Sin apuesta activa</p>
+                    <p className="text-text-muted text-sm">Realiza tu próxima predicción ahora</p>
                   </div>
-                </Card>
-              ))}
+                  <Link href="/events">
+                    <Button>Ver eventos</Button>
+                  </Link>
+                </div>
+              </Card>
+            )}
+
+            {/* Upcoming events */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-display font-bold text-xl text-text-primary">Próximos Eventos</h2>
+                <Link href="/events" className="text-accent text-sm font-medium hover:text-accent-dim">Ver todos →</Link>
+              </div>
+              {upcomingEvents && upcomingEvents.length > 0 ? (
+                <UpcomingEvents
+                  events={upcomingEvents as Event[]}
+                  profile={(profile || null) as Profile | null}
+                  hasActiveBet={!!activeBet}
+                />
+              ) : (
+                <EmptyState icon="📅" title="No hay eventos próximos" description="El administrador publicará nuevos eventos pronto." />
+              )}
             </div>
           </div>
-        )}
+
+          {/* Right panel — desktop only */}
+          <div className="space-y-4">
+            {/* Rewards progress */}
+            {nextReward && (
+              <RewardsProgress
+                currentPoints={profile?.points || 0}
+                nextReward={nextReward}
+              />
+            )}
+
+            {/* Recent bets */}
+            {recentBets && recentBets.length > 0 && (
+              <Card className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="font-display font-bold text-base text-text-primary">Últimas Apuestas</h2>
+                  <Link href="/bets" className="text-accent text-xs font-medium hover:text-accent-dim">Ver todas →</Link>
+                </div>
+                <div className="space-y-2">
+                  {recentBets.map((bet) => (
+                    <div key={bet.id} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+                      <span className="text-base">{bet.event && getSportIcon(bet.event.sport)}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-text-primary text-xs font-medium truncate">
+                          {bet.event?.home_team} vs {bet.event?.away_team}
+                        </p>
+                        <p className="text-text-muted text-[10px]">{getPredictionLabel(bet.prediction)} · {formatPoints(bet.amount)} pts</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        {bet.status === "won" && <span className="text-win font-bold text-xs">+{formatPoints(bet.potential_win)}</span>}
+                        {bet.status === "lost" && <span className="text-loss font-bold text-xs">-{formatPoints(bet.amount)}</span>}
+                        {bet.status === "cancelled" && <span className="text-text-muted text-xs">Cancelada</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {/* Quick links */}
+            <Card className="p-4">
+              <h2 className="font-display font-bold text-base text-text-primary mb-3">Accesos rápidos</h2>
+              <div className="space-y-1">
+                {[
+                  { href: "/events", label: "Ver eventos disponibles", icon: "📅" },
+                  { href: "/leaderboard", label: "Clasificación global", icon: "🏆" },
+                  { href: "/rewards", label: "Canjear premios", icon: "🎁" },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-surface-2 transition-colors text-text-secondary hover:text-text-primary text-sm"
+                  >
+                    <span>{item.icon}</span>
+                    <span>{item.label}</span>
+                  </Link>
+                ))}
+              </div>
+            </Card>
+          </div>
+        </div>
       </div>
     </AppLayout>
   );

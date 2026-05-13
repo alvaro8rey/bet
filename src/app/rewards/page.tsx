@@ -275,7 +275,7 @@ export default function RewardsPage() {
             <h2 className="font-semibold text-lg text-text-primary mb-1">Premios Digitales</h2>
             <p className="text-text-muted text-xs">Códigos, suscripciones y créditos</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {digitalRewards.map((reward) => (
               <RewardCard
                 key={reward.id}
@@ -293,7 +293,7 @@ export default function RewardsPage() {
             <h2 className="font-semibold text-lg text-text-primary mb-1">Premios Físicos</h2>
             <p className="text-text-muted text-xs">Artículos y consolas</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {fisicosRewards.map((reward) => (
               <RewardCard
                 key={reward.id}

@@ -136,7 +136,7 @@ export default function EventsPage() {
             description="No se encontraron eventos con los filtros seleccionados."
           />
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {events.map((event) => (
               <EventCard
                 key={event.id}

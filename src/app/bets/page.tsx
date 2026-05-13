@@ -110,7 +110,7 @@ export default async function BetsPage() {
               description="Tu apuesta activa aparecerá aquí cuando se resuelva."
             />
           ) : (
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               {resolvedBets.map((bet) => (
                 <BetCard key={bet.id} bet={bet} />
               ))}

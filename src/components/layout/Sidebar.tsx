@@ -40,6 +40,27 @@ export function Sidebar() {
             <span className="text-accent font-bold text-2xl">{profile ? formatPoints(profile.points) : "—"}</span>
             <span className="text-accent/60 text-sm mb-0.5">pts</span>
           </div>
+
+          {/* Mini stats */}
+          {profile && (
+            <div className="mt-3 pt-3 border-t border-accent/10 grid grid-cols-3 gap-1 text-center">
+              <div>
+                <p className="text-text-primary font-bold text-sm">{profile.total_bets}</p>
+                <p className="text-text-muted text-[10px]">Totales</p>
+              </div>
+              <div>
+                <p className="text-win font-bold text-sm">{profile.won_bets}</p>
+                <p className="text-text-muted text-[10px]">Ganadas</p>
+              </div>
+              <div>
+                <p className="text-pending font-bold text-sm">
+                  {profile.total_bets > 0 ? Math.round((profile.won_bets / profile.total_bets) * 100) : 0}%
+                </p>
+                <p className="text-text-muted text-[10px]">Éxito</p>
+              </div>
+            </div>
+          )}
+
           {activeBet && (
             <div className="mt-3 pt-3 border-t border-accent/10">
               <p className="text-xs text-pending font-medium">🎯 Apuesta activa: {activeBet.amount} pts</p>

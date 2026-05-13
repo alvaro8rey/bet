@@ -62,7 +62,7 @@ export default async function LeaderboardPage() {
         )}
 
         {/* Leaderboard */}
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
           {profiles?.map((profile, index) => {
             const rank = index + 1;
             const isMe = profile.user_id === user.id;
