@@ -56,8 +56,15 @@ export function EventCard({ event, onBet, hasActiveBet, compact }: EventCardProp
         <div className="flex items-center gap-2 mb-4">
           {/* Home */}
           <div className="flex-1 text-center">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-1.5 bg-surface-2 rounded-xl flex items-center justify-center text-base sm:text-xl border border-border">
-              🏠
+            <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-1.5">
+              {event.home_team_logo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={event.home_team_logo} alt={event.home_team} className="w-full h-full object-contain" />
+              ) : (
+                <div className="w-full h-full bg-surface-2 rounded-xl flex items-center justify-center text-base sm:text-xl border border-border">
+                  {getSportIcon(event.sport)}
+                </div>
+              )}
             </div>
             <p className="text-text-primary font-semibold text-xs sm:text-sm leading-tight">{event.home_team}</p>
           </div>
@@ -80,8 +87,15 @@ export function EventCard({ event, onBet, hasActiveBet, compact }: EventCardProp
 
           {/* Away */}
           <div className="flex-1 text-center">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-1.5 bg-surface-2 rounded-xl flex items-center justify-center text-base sm:text-xl border border-border">
-              ✈️
+            <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-1.5">
+              {event.away_team_logo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={event.away_team_logo} alt={event.away_team} className="w-full h-full object-contain" />
+              ) : (
+                <div className="w-full h-full bg-surface-2 rounded-xl flex items-center justify-center text-base sm:text-xl border border-border">
+                  {getSportIcon(event.sport)}
+                </div>
+              )}
             </div>
             <p className="text-text-primary font-semibold text-xs sm:text-sm leading-tight">{event.away_team}</p>
           </div>

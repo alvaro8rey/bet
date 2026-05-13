@@ -86,9 +86,24 @@ export default function ImportEventsPage() {
 
   useEffect(() => { loadEvents(); }, [loadEvents]);
 
+  const fetchTeamLogo = async (teamName: string): Promise<string | null> => {
+    try {
+      const res = await fetch(`https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${encodeURIComponent(teamName)}`);
+      const data = await res.json();
+      return data.teams?.[0]?.strTeamBadge ?? null;
+    } catch {
+      return null;
+    }
+  };
+
   const importEvent = async (event: ApiEvent) => {
     setImportingId(event.api_id);
     try {
+      const [homeLogo, awayLogo] = await Promise.all([
+        fetchTeamLogo(event.home_team),
+        fetchTeamLogo(event.away_team),
+      ]);
+
       const { error } = await supabase.from("events").insert({
         sport: event.our_sport,
         competition: event.sport_title,
@@ -104,6 +119,8 @@ export default function ImportEventsPage() {
         result: null,
         api_event_id: event.api_id,
         api_sport_key: event.sport_key,
+        home_team_logo: homeLogo,
+        away_team_logo: awayLogo,
       });
       if (error) throw error;
       setImportedIds((prev) => new Set([...prev, event.api_id]));
