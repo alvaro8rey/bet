@@ -144,8 +144,8 @@ export async function resolveEvent(
         profilesByUserId.set(bet.user_id, {
           ...profile,
           points: newPoints,
-          won_bets: updateData.won_bets ?? profile.won_bets,
-          lost_bets: updateData.lost_bets ?? profile.lost_bets,
+          won_bets: won ? profile.won_bets + 1 : profile.won_bets,
+          lost_bets: won ? profile.lost_bets : profile.lost_bets + 1,
         });
       }
     }
