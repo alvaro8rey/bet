@@ -67,7 +67,7 @@ export default async function DashboardPage() {
             <h1 className="font-display font-black text-3xl text-text-primary mb-1">
               Hola, {profile?.username} 👋
             </h1>
-            <p className="text-text-muted text-sm">Tu resumen de predicciones</p>
+            <p className="text-text-muted text-sm">Tu resumen de predicciones · {new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}</p>
           </div>
           {profile?.is_admin && (
             <Link href="/admin">
