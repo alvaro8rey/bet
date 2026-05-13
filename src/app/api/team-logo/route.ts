@@ -1,73 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const HEADERS = {
-  "User-Agent": "PlayfulBet/1.0 (sports app; contact@playfulbet.com)",
-  "Accept": "application/json",
-};
+const UA = "PlayfulBet/1.0 (https://github.com/alvaro8rey/bet; contact@playfulbet.com)";
 
-async function tryWikipediaSummary(title: string): Promise<string | null> {
-  try {
-    const res = await fetch(
-      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`,
-      { headers: HEADERS, next: { revalidate: 86400 } }
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.thumbnail?.source ?? data.originalimage?.source ?? null;
-  } catch {
-    return null;
-  }
+async function wikiSummary(title: string): Promise<string | null> {
+  const res = await fetch(
+    `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`,
+    { headers: { "User-Agent": UA, Accept: "application/json" }, next: { revalidate: 86400 } }
+  );
+  if (!res.ok) return null;
+  const d = await res.json();
+  return d.thumbnail?.source ?? null;
 }
 
-async function getLogoViaWikipediaSearch(teamName: string): Promise<string | null> {
-  try {
-    // Search Wikipedia for the team article
-    const searchRes = await fetch(
-      `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(teamName)}&format=json&srlimit=3&srnamespace=0`,
-      { headers: HEADERS, next: { revalidate: 86400 } }
-    );
-    if (!searchRes.ok) return null;
-    const searchData = await searchRes.json();
-    const results: { title: string }[] = searchData?.query?.search ?? [];
-    if (!results.length) return null;
+async function wikiSearch(query: string): Promise<string | null> {
+  const res = await fetch(
+    `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&srlimit=1&srnamespace=0`,
+    { headers: { "User-Agent": UA }, next: { revalidate: 86400 } }
+  );
+  if (!res.ok) return null;
+  const d = await res.json();
+  const title = d?.query?.search?.[0]?.title;
+  if (!title) return null;
 
-    // Try the top search results for a thumbnail
-    for (const result of results.slice(0, 2)) {
-      const imgRes = await fetch(
-        `https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=thumbnail&pithumbsize=200&titles=${encodeURIComponent(result.title)}`,
-        { headers: HEADERS, next: { revalidate: 86400 } }
-      );
-      if (!imgRes.ok) continue;
-      const imgData = await imgRes.json();
-      const pages = Object.values(imgData?.query?.pages ?? {}) as any[];
-      const src = pages[0]?.thumbnail?.source;
-      if (src) return src;
-    }
-    return null;
-  } catch {
-    return null;
-  }
+  const img = await fetch(
+    `https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=thumbnail&pithumbsize=200&titles=${encodeURIComponent(title)}`,
+    { headers: { "User-Agent": UA }, next: { revalidate: 86400 } }
+  );
+  if (!img.ok) return null;
+  const imgd = await img.json();
+  const pages = Object.values(imgd?.query?.pages ?? {}) as any[];
+  return pages[0]?.thumbnail?.source ?? null;
 }
 
 export async function GET(req: NextRequest) {
   const team = req.nextUrl.searchParams.get("team");
   if (!team) return NextResponse.json({ url: null });
 
-  // Try direct Wikipedia summary first, then fallback to search
-  const variations = [
-    team,
-    `${team} F.C.`,
-    `${team} FC`,
-    `FC ${team}`,
-    `${team} CF`,
-  ];
-
-  for (const variant of variations) {
-    const url = await tryWikipediaSummary(variant);
-    if (url) return NextResponse.json({ url });
+  // Try direct Wikipedia lookups with common naming patterns
+  for (const v of [team, `${team} F.C.`, `${team} FC`, `FC ${team}`, `${team} CF`]) {
+    try {
+      const url = await wikiSummary(v);
+      if (url) return NextResponse.json({ url });
+    } catch { /* continue */ }
   }
 
-  // Fallback: search Wikipedia
-  const url = await getLogoViaWikipediaSearch(team);
-  return NextResponse.json({ url });
+  // Fallback: Wikipedia search
+  try {
+    const url = await wikiSearch(`${team} football club`);
+    if (url) return NextResponse.json({ url });
+  } catch { /* continue */ }
+
+  return NextResponse.json({ url: null });
 }
