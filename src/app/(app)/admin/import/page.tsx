@@ -88,10 +88,17 @@ export default function ImportEventsPage() {
 
   const fetchTeamLogo = async (teamName: string): Promise<string | null> => {
     try {
-      const res = await fetch(`/api/team-logo?team=${encodeURIComponent(teamName)}`);
+      // Call SofaScore directly from the browser (not via our server)
+      // Servers (Vercel/AWS) are blocked by these APIs, but browsers are not
+      const res = await fetch(
+        `https://api.sofascore.app/api/v1/team/search?q=${encodeURIComponent(teamName)}`,
+        { headers: { "Accept": "application/json" } }
+      );
       if (!res.ok) return null;
       const data = await res.json();
-      return data.url ?? null;
+      const id = data.teams?.[0]?.id;
+      if (!id) return null;
+      return `https://api.sofascore.app/api/v1/team/${id}/image`;
     } catch {
       return null;
     }
