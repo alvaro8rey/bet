@@ -1,54 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const UA = "PlayfulBet/1.0 (https://github.com/alvaro8rey/bet; contact@playfulbet.com)";
+const UA = "PlayfulBet/1.0 (sports betting app; https://github.com/alvaro8rey/bet)";
 
-async function wikiSummary(title: string): Promise<string | null> {
-  const res = await fetch(
-    `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`,
-    { headers: { "User-Agent": UA, Accept: "application/json" }, next: { revalidate: 86400 } }
-  );
-  if (!res.ok) return null;
-  const d = await res.json();
-  return d.thumbnail?.source ?? null;
-}
-
-async function wikiSearch(query: string): Promise<string | null> {
-  const res = await fetch(
-    `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&srlimit=1&srnamespace=0`,
+async function getLogoFromWikidata(teamName: string): Promise<string | null> {
+  // Step 1: search Wikidata for the team entity
+  const searchRes = await fetch(
+    `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(teamName)}&language=en&type=item&format=json&limit=5`,
     { headers: { "User-Agent": UA }, next: { revalidate: 86400 } }
   );
-  if (!res.ok) return null;
-  const d = await res.json();
-  const title = d?.query?.search?.[0]?.title;
-  if (!title) return null;
+  if (!searchRes.ok) return null;
+  const searchData = await searchRes.json();
+  const results: { id: string }[] = searchData.search ?? [];
+  if (!results.length) return null;
 
-  const img = await fetch(
-    `https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=thumbnail&pithumbsize=200&titles=${encodeURIComponent(title)}`,
-    { headers: { "User-Agent": UA }, next: { revalidate: 86400 } }
-  );
-  if (!img.ok) return null;
-  const imgd = await img.json();
-  const pages = Object.values(imgd?.query?.pages ?? {}) as any[];
-  return pages[0]?.thumbnail?.source ?? null;
+  // Step 2: for top results, look for the P154 (logo image) claim
+  for (const result of results.slice(0, 3)) {
+    const entityRes = await fetch(
+      `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${result.id}&props=claims&format=json`,
+      { headers: { "User-Agent": UA }, next: { revalidate: 86400 } }
+    );
+    if (!entityRes.ok) continue;
+    const entityData = await entityRes.json();
+    const filename =
+      entityData.entities?.[result.id]?.claims?.P154?.[0]?.mainsnak?.datavalue?.value;
+    if (filename) {
+      // Wikimedia Commons Special:FilePath redirects to the actual file
+      return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(filename)}`;
+    }
+  }
+  return null;
 }
 
 export async function GET(req: NextRequest) {
   const team = req.nextUrl.searchParams.get("team");
   if (!team) return NextResponse.json({ url: null });
 
-  // Try direct Wikipedia lookups with common naming patterns
-  for (const v of [team, `${team} F.C.`, `${team} FC`, `FC ${team}`, `${team} CF`]) {
+  // Try exact name and common variations
+  const variations = [team, `${team} FC`, `FC ${team}`, `${team} CF`, `RC ${team}`];
+
+  for (const v of variations) {
     try {
-      const url = await wikiSummary(v);
+      const url = await getLogoFromWikidata(v);
       if (url) return NextResponse.json({ url });
     } catch { /* continue */ }
   }
-
-  // Fallback: Wikipedia search
-  try {
-    const url = await wikiSearch(`${team} football club`);
-    if (url) return NextResponse.json({ url });
-  } catch { /* continue */ }
 
   return NextResponse.json({ url: null });
 }
