@@ -20,6 +20,7 @@ interface Redemption {
   reward: {
     nombre: string;
     puntos_necesarios: number;
+    categoria: string;
   };
   profile: {
     username: string;
@@ -45,7 +46,7 @@ export default function AdminRedemptionsPage() {
         const enrichedData = await Promise.all(
           (data as any[]).map(async (redemption) => {
             const [{ data: reward }, { data: profile }] = await Promise.all([
-              supabase.from("rewards").select("nombre, puntos_necesarios").eq("id", redemption.reward_id).single(),
+              supabase.from("rewards").select("nombre, puntos_necesarios, categoria").eq("id", redemption.reward_id).single(),
               supabase.from("profiles").select("username").eq("user_id", redemption.user_id).single(),
             ]);
             return {

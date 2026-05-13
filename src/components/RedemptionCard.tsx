@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Card } from "@/components/ui/Card";
 import { formatDateShort } from "@/utils";
-import { Mail, Phone, MapPin, FileText, CheckCircle, Clock, AlertCircle, ChevronDown } from "lucide-react";
+import { Mail, Phone, MapPin, FileText, CheckCircle, Clock, AlertCircle, ChevronDown, Key } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface RedemptionCardProps {
@@ -15,7 +15,11 @@ interface RedemptionCardProps {
 export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showKeyInput, setShowKeyInput] = useState(false);
+  const [digitalKey, setDigitalKey] = useState("");
   const supabase = createClient();
+
+  const isDigital = redemption.reward?.categoria === "digital";
 
   const statusConfig = {
     pending: { label: "Pendiente", icon: Clock, bg: "bg-pending/10", text: "text-pending" },
@@ -27,7 +31,7 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
   const config = statusConfig[redemption.status as keyof typeof statusConfig];
   const Icon = config.icon;
 
-  const updateStatus = async (newStatus: string) => {
+  const updateStatus = async (newStatus: string, key?: string) => {
     setLoading(true);
     try {
       const { error } = await supabase
@@ -37,7 +41,6 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
 
       if (error) throw error;
 
-      // Enviar email automático
       try {
         await supabase.functions.invoke("send-redemption-email", {
           body: {
@@ -46,6 +49,7 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
             reward_nombre: redemption.reward?.nombre,
             status: newStatus,
             puntos: redemption.reward?.puntos_necesarios,
+            ...(key ? { codigo_digital: key } : {}),
           },
         });
       } catch (emailError) {
@@ -54,11 +58,22 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
 
       toast.success(`Estado actualizado a "${statusConfig[newStatus as keyof typeof statusConfig].label}"`);
       setIsOpen(false);
+      setShowKeyInput(false);
+      setDigitalKey("");
       onStatusChange?.();
     } catch (error) {
       toast.error("Error al actualizar estado");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleStatusClick = (status: string) => {
+    if (status === "completed" && isDigital) {
+      setIsOpen(false);
+      setShowKeyInput(true);
+    } else {
+      updateStatus(status);
     }
   };
 
@@ -72,7 +87,12 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
               <p className="font-semibold text-text-primary">{redemption.nombre}</p>
               <p className="text-text-muted text-xs font-medium">@{redemption.profile?.username}</p>
             </div>
-            <p className="text-accent font-bold text-sm">{redemption.reward?.nombre}</p>
+            <p className="text-accent font-bold text-sm">
+              {redemption.reward?.nombre}
+              {isDigital && (
+                <span className="ml-2 text-[10px] bg-accent/10 text-accent px-1.5 py-0.5 rounded-md font-medium">Digital</span>
+              )}
+            </p>
           </div>
 
           {/* Status dropdown */}
@@ -91,7 +111,7 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
                 {Object.entries(statusConfig).map(([status, cfg]) => (
                   <button
                     key={status}
-                    onClick={() => updateStatus(status)}
+                    onClick={() => handleStatusClick(status)}
                     disabled={loading || status === redemption.status}
                     className={`w-full px-4 py-2.5 text-sm font-medium text-left transition ${
                       status === redemption.status
@@ -107,6 +127,41 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
           </div>
         </div>
 
+        {/* Digital key input — shown when completing a digital reward */}
+        {showKeyInput && (
+          <div className="bg-accent/5 border border-accent/20 rounded-xl p-4 space-y-3">
+            <div className="flex items-center gap-2 text-accent text-sm font-semibold">
+              <Key size={15} />
+              Introduce la clave o código digital
+            </div>
+            <p className="text-text-muted text-xs">Se incluirá en el email enviado al usuario junto con la confirmación del canje.</p>
+            <input
+              type="text"
+              value={digitalKey}
+              onChange={(e) => setDigitalKey(e.target.value)}
+              placeholder="Ej: XXXXX-XXXXX-XXXXX"
+              className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/60 font-mono"
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => updateStatus("completed", digitalKey)}
+                disabled={loading || !digitalKey.trim()}
+                className="flex-1 bg-accent text-background font-semibold text-sm py-2 rounded-lg hover:bg-accent/90 disabled:opacity-40 transition"
+              >
+                {loading ? "Enviando..." : "Confirmar y enviar email"}
+              </button>
+              <button
+                onClick={() => { setShowKeyInput(false); setDigitalKey(""); }}
+                disabled={loading}
+                className="px-4 py-2 text-sm text-text-muted hover:text-text-primary transition"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Contact Info */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
           <div className="flex items-center gap-2 text-text-secondary">
@@ -121,10 +176,12 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
             </div>
           )}
 
-          <div className="flex items-start gap-2 text-text-secondary sm:col-span-2">
-            <MapPin size={16} className="flex-shrink-0 text-text-muted mt-0.5" />
-            <span>{redemption.direccion}</span>
-          </div>
+          {redemption.direccion && (
+            <div className="flex items-start gap-2 text-text-secondary sm:col-span-2">
+              <MapPin size={16} className="flex-shrink-0 text-text-muted mt-0.5" />
+              <span>{redemption.direccion}</span>
+            </div>
+          )}
         </div>
 
         {/* Notes */}
