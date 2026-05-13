@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/types";
 
@@ -34,64 +34,75 @@ async function applyBankruptcyResetIfNeeded(
 export function useProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
   const supabase = createClient();
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
-  const fetchProfile = useCallback(async () => {
-    setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setLoading(false); return; }
-
-    setUserId(user.id);
-
+  const fetchProfile = useCallback(async (userId: string) => {
     const { data } = await supabase
       .from("profiles")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .single();
 
-    if (!data) { setLoading(false); return; }
+    if (!data) return;
 
-    const resolved = await applyBankruptcyResetIfNeeded(supabase, data, user.id);
+    const resolved = await applyBankruptcyResetIfNeeded(supabase, data, userId);
     setProfile(resolved);
     setLoading(false);
   }, [supabase]);
 
   useEffect(() => {
-    fetchProfile();
+    let cancelled = false;
+
+    const init = async () => {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || cancelled) { setLoading(false); return; }
+
+      await fetchProfile(user.id);
+
+      // Limpiar canal previo si existe
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
+
+      const channel = supabase
+        .channel(`profile-${user.id}-${Date.now()}`)
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` },
+          async (payload) => {
+            if (cancelled) return;
+            const updated = payload.new as Profile;
+            const resolved = await applyBankruptcyResetIfNeeded(supabase, updated, user.id);
+            setProfile(resolved);
+          }
+        )
+        .subscribe();
+
+      channelRef.current = channel;
+    };
+
+    init();
 
     const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange(() => {
-      fetchProfile();
+      if (!cancelled) init();
     });
 
-    return () => authSub.unsubscribe();
-  }, [fetchProfile, supabase]);
+    return () => {
+      cancelled = true;
+      authSub.unsubscribe();
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+    };
+  }, [supabase, fetchProfile]);
 
-  // Suscripción en tiempo real: cualquier UPDATE en el perfil del usuario
-  // actualiza el estado local sin recargar la página
-  useEffect(() => {
-    if (!userId) return;
+  const refetch = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) await fetchProfile(user.id);
+  }, [supabase, fetchProfile]);
 
-    const channel = supabase
-      .channel(`profile:${userId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "profiles",
-          filter: `user_id=eq.${userId}`,
-        },
-        async (payload) => {
-          const updated = payload.new as Profile;
-          const resolved = await applyBankruptcyResetIfNeeded(supabase, updated, userId);
-          setProfile(resolved);
-        }
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, [userId, supabase]);
-
-  return { profile, loading, refetch: fetchProfile };
+  return { profile, loading, refetch };
 }
