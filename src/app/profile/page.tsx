@@ -4,6 +4,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/Card";
 import { formatPoints, formatDate, getWinRateColor } from "@/utils";
 import { LogoutButton } from "@/components/profile/LogoutButton";
+import Link from "next/link";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -68,18 +69,18 @@ export default async function ProfilePage() {
             </div>
             <div className="ml-auto flex flex-col items-end gap-3 hidden sm:flex">
               <LogoutButton />
-              <div className="text-right">
-                <p className="text-accent font-bold text-3xl">{formatPoints(profile?.points || 0)}</p>
-                <p className="text-text-muted text-sm">puntos actuales</p>
-              </div>
+              <Link href="/earn" className="text-right group">
+                <p className="text-accent font-bold text-3xl group-hover:text-accent/80 transition-colors">{formatPoints(profile?.points || 0)}</p>
+                <p className="text-text-muted text-sm group-hover:text-accent/60 transition-colors">puntos actuales ↗</p>
+              </Link>
             </div>
           </div>
           {/* Mobile points & logout */}
           <div className="sm:hidden mt-4 pt-4 border-t border-border space-y-3">
-            <div className="text-center">
-              <p className="text-accent font-bold text-3xl">{formatPoints(profile?.points || 0)}</p>
-              <p className="text-text-muted text-sm">puntos actuales</p>
-            </div>
+            <Link href="/earn" className="block text-center group">
+              <p className="text-accent font-bold text-3xl group-hover:text-accent/80 transition-colors">{formatPoints(profile?.points || 0)}</p>
+              <p className="text-text-muted text-sm group-hover:text-accent/60 transition-colors">puntos actuales ↗</p>
+            </Link>
             <div className="flex justify-center">
               <LogoutButton />
             </div>

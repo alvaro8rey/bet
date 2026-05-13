@@ -71,15 +71,17 @@ export default async function DashboardPage() {
 
         {/* Stats grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 bg-accent-muted rounded-lg flex items-center justify-center">
-                <span className="text-accent text-sm">💎</span>
+          <Link href="/earn">
+            <Card className="p-4 hover:border-accent/40 transition-colors cursor-pointer">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 bg-accent-muted rounded-lg flex items-center justify-center">
+                  <span className="text-accent text-sm">💎</span>
+                </div>
+                <span className="text-text-muted text-xs">Puntos</span>
               </div>
-              <span className="text-text-muted text-xs">Puntos</span>
-            </div>
-            <p className="text-accent font-bold text-2xl">{formatPoints(profile?.points || 0)}</p>
-          </Card>
+              <p className="text-accent font-bold text-2xl">{formatPoints(profile?.points || 0)}</p>
+            </Card>
+          </Link>
 
           <Card className="p-4">
             <div className="flex items-center gap-2 mb-2">

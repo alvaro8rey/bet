@@ -17,24 +17,7 @@ export default async function EarnPage() {
     .eq("user_id", user.id)
     .single();
 
-  const providers = [
-    ...(process.env.NEXT_PUBLIC_MONLIX_APP_ID
-      ? [{
-          id: "monlix",
-          name: "Monlix",
-          url: `https://www.monlix.com/wall/${process.env.NEXT_PUBLIC_MONLIX_APP_ID}?sub_id={userId}`,
-          description: "Completa encuestas, descarga apps y más para ganar puntos",
-        }]
-      : []),
-    ...(process.env.NEXT_PUBLIC_BITLABS_APP_ID
-      ? [{
-          id: "bitlabs",
-          name: "BitLabs",
-          url: `https://web.bitlabs.ai/?uid={userId}&token=${process.env.NEXT_PUBLIC_BITLABS_APP_ID}`,
-          description: "Encuestas de alta remuneración de BitLabs",
-        }]
-      : []),
-  ];
+  const appId = process.env.NEXT_PUBLIC_MONLIX_APP_ID;
 
   return (
     <AppLayout>
@@ -59,15 +42,15 @@ export default async function EarnPage() {
         </Card>
 
         {/* Offerwall */}
-        {providers.length > 0 ? (
-          <EarnOfferwall userId={user.id} providers={providers} />
+        {appId ? (
+          <EarnOfferwall appId={appId} userId={user.id} />
         ) : (
           <Card className="p-10 text-center">
             <Zap size={40} className="text-text-muted mx-auto mb-3 opacity-40" />
             <p className="text-text-primary font-semibold mb-1">Offerwall no configurado</p>
             <p className="text-text-muted text-sm">
-              Añade <code className="bg-surface-2 px-1.5 py-0.5 rounded text-accent">NEXT_PUBLIC_MONLIX_APP_ID</code> o{" "}
-              <code className="bg-surface-2 px-1.5 py-0.5 rounded text-accent">NEXT_PUBLIC_BITLABS_APP_ID</code> a las variables de entorno.
+              Añade <code className="bg-surface-2 px-1.5 py-0.5 rounded text-accent">NEXT_PUBLIC_MONLIX_APP_ID</code> y{" "}
+              <code className="bg-surface-2 px-1.5 py-0.5 rounded text-accent">MONLIX_SECRET_KEY</code> a las variables de entorno.
             </p>
           </Card>
         )}
