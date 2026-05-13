@@ -15,6 +15,7 @@ import {
   User,
   Settings,
   AlertTriangle,
+  Zap,
 } from "lucide-react";
 
 const navItems = [
@@ -23,6 +24,7 @@ const navItems = [
   { href: "/bets", icon: Ticket, label: "Mis Apuestas" },
   { href: "/leaderboard", icon: Trophy, label: "Clasificación" },
   { href: "/rewards", icon: Gift, label: "Premios" },
+  { href: "/earn", icon: Zap, label: "Ganar Puntos" },
   { href: "/profile", icon: User, label: "Perfil" },
 ];
 
