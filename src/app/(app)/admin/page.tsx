@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/Card";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { formatPoints, getSportIcon, formatDateShort, getEventStatusLabel } from "@/utils";
-import { Plus, Users, Calendar, Ticket, Gift, Package } from "lucide-react";
+import { Plus, Users, Calendar, Ticket, Gift, Package, Download } from "lucide-react";
 
 export default async function AdminPage() {
   const supabase = await createClient();
@@ -37,6 +37,12 @@ export default async function AdminPage() {
               <Button variant="secondary">
                 <Package size={16} />
                 Gestionar Premios
+              </Button>
+            </Link>
+            <Link href="/admin/import">
+              <Button variant="secondary">
+                <Download size={16} />
+                Importar desde API
               </Button>
             </Link>
             <Link href="/admin/events/new">

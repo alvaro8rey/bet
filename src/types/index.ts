@@ -32,6 +32,8 @@ export interface Event {
   home_score: number | null;
   away_score: number | null;
   result: BetResult | null;
+  api_event_id: string | null;
+  api_sport_key: string | null;
   created_at: string;
   updated_at: string;
 }
