@@ -109,18 +109,18 @@ export default async function ProfilePage() {
         {/* P&L */}
         <Card className="p-5">
           <h2 className="font-display font-bold text-lg text-text-primary mb-4">Balance de puntos</h2>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
             <div className="text-center">
               <p className="text-text-muted text-xs mb-1">Ganado</p>
-              <p className="text-win font-bold text-xl">+{formatPoints(totalWon)}</p>
+              <p className="text-win font-bold text-base sm:text-xl">+{formatPoints(totalWon)}</p>
             </div>
             <div className="text-center border-x border-border">
               <p className="text-text-muted text-xs mb-1">Perdido</p>
-              <p className="text-loss font-bold text-xl">-{formatPoints(totalLost)}</p>
+              <p className="text-loss font-bold text-base sm:text-xl">-{formatPoints(totalLost)}</p>
             </div>
             <div className="text-center">
               <p className="text-text-muted text-xs mb-1">Neto</p>
-              <p className={`font-bold text-xl ${netBalance >= 0 ? "text-win" : "text-loss"}`}>
+              <p className={`font-bold text-base sm:text-xl ${netBalance >= 0 ? "text-win" : "text-loss"}`}>
                 {netBalance >= 0 ? "+" : ""}{formatPoints(netBalance)}
               </p>
             </div>

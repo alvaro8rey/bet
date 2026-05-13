@@ -38,18 +38,18 @@ export function BetCard({ bet }: BetCardProps) {
           <Badge variant={statusVariant[bet.status]}>{statusLabel[bet.status]}</Badge>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 mb-3">
-          <div className="bg-surface-2 rounded-xl p-3 border border-border">
-            <p className="text-text-muted text-xs mb-1">Predicción</p>
-            <p className="text-text-primary text-sm font-semibold">{getPredictionLabel(bet.prediction)}</p>
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-3">
+          <div className="bg-surface-2 rounded-xl p-2 sm:p-3 border border-border">
+            <p className="text-text-muted text-[10px] sm:text-xs mb-0.5 sm:mb-1">Predicción</p>
+            <p className="text-text-primary text-xs sm:text-sm font-semibold">{getPredictionLabel(bet.prediction)}</p>
           </div>
-          <div className="bg-surface-2 rounded-xl p-3 border border-border">
-            <p className="text-text-muted text-xs mb-1">Apostado</p>
-            <p className="text-text-primary text-sm font-semibold">{formatPoints(bet.amount)} pts</p>
+          <div className="bg-surface-2 rounded-xl p-2 sm:p-3 border border-border">
+            <p className="text-text-muted text-[10px] sm:text-xs mb-0.5 sm:mb-1">Apostado</p>
+            <p className="text-text-primary text-xs sm:text-sm font-semibold">{formatPoints(bet.amount)} pts</p>
           </div>
-          <div className="bg-surface-2 rounded-xl p-3 border border-border">
-            <p className="text-text-muted text-xs mb-1">Cuota</p>
-            <p className="text-accent text-sm font-bold">{formatOdds(bet.odds)}</p>
+          <div className="bg-surface-2 rounded-xl p-2 sm:p-3 border border-border">
+            <p className="text-text-muted text-[10px] sm:text-xs mb-0.5 sm:mb-1">Cuota</p>
+            <p className="text-accent text-xs sm:text-sm font-bold">{formatOdds(bet.odds)}</p>
           </div>
         </div>
 

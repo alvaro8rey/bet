@@ -75,9 +75,9 @@ export default async function LeaderboardPage() {
                 key={profile.user_id}
                 className={`p-4 transition-all ${isMe ? "border-accent/30 bg-accent-muted/5" : ""}`}
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   {/* Rank */}
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 font-display font-black text-sm ${
+                  <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0 font-display font-black text-xs sm:text-sm ${
                     rank === 1 ? "bg-yellow-500/20 text-yellow-400" :
                     rank === 2 ? "bg-gray-400/20 text-gray-300" :
                     rank === 3 ? "bg-orange-500/20 text-orange-400" :
@@ -86,8 +86,8 @@ export default async function LeaderboardPage() {
                     {rank <= 3 ? ["🥇","🥈","🥉"][rank-1] : `#${rank}`}
                   </div>
 
-                  {/* Avatar */}
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                  {/* Avatar — hidden on xs to save space */}
+                  <div className={`hidden sm:flex w-10 h-10 rounded-xl items-center justify-center flex-shrink-0 ${
                     isMe ? "bg-gradient-to-br from-accent to-blue" : "bg-surface-3"
                   }`}>
                     <span className={`font-bold text-sm ${isMe ? "text-background" : "text-text-secondary"}`}>
@@ -97,21 +97,21 @@ export default async function LeaderboardPage() {
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                       <p className={`font-semibold text-sm ${isMe ? "text-accent" : "text-text-primary"}`}>
                         {profile.username}
                       </p>
                       {isMe && <span className="text-xs text-accent/60 font-medium">(tú)</span>}
                     </div>
-                    <div className="flex items-center gap-3 mt-0.5">
+                    <div className="flex items-center gap-2 sm:gap-3 mt-0.5">
                       <p className="text-text-muted text-xs">{profile.total_bets} apuestas</p>
-                      <p className={`text-xs font-medium ${getWinRateColor(winRate)}`}>{winRate}% éxito</p>
+                      <p className={`text-xs font-medium ${getWinRateColor(winRate)}`}>{winRate}%</p>
                     </div>
                   </div>
 
                   {/* Points */}
                   <div className="text-right">
-                    <p className={`font-bold text-base ${rank <= 3 ? "text-accent" : "text-text-primary"}`}>
+                    <p className={`font-bold text-sm sm:text-base ${rank <= 3 ? "text-accent" : "text-text-primary"}`}>
                       {formatPoints(profile.points)}
                     </p>
                     <p className="text-text-muted text-xs">pts</p>
@@ -123,7 +123,7 @@ export default async function LeaderboardPage() {
         </div>
 
         {(!profiles || profiles.length === 0) && (
-          <Card className="p-10 text-center">
+          <Card className="p-6 sm:p-10 text-center">
             <Trophy size={40} className="text-text-muted mx-auto mb-3" />
             <p className="text-text-primary font-semibold">Sin datos aún</p>
             <p className="text-text-muted text-sm">El ranking se llenará cuando los usuarios hagan predicciones.</p>

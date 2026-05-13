@@ -59,12 +59,12 @@ export default async function BetsPage() {
                 <div className="flex items-center gap-2 mb-4">
                   <Badge variant="pending" dot>Pendiente de resultado</Badge>
                 </div>
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
                   <div className="flex-1">
                     <p className="text-xs text-text-muted mb-1">
                       {bet.event && getSportIcon(bet.event.sport)} {bet.event?.competition}
                     </p>
-                    <p className="text-text-primary font-bold text-lg">
+                    <p className="text-text-primary font-bold text-base sm:text-lg">
                       {bet.event?.home_team} vs {bet.event?.away_team}
                     </p>
                     <p className="text-text-secondary text-sm mt-1">
@@ -72,12 +72,14 @@ export default async function BetsPage() {
                     </p>
                     <p className="text-text-muted text-xs mt-1">{formatDate(bet.created_at)}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-text-muted text-xs mb-1">Apostado</p>
-                    <p className="text-text-primary font-bold">{formatPoints(bet.amount)} pts</p>
-                    <p className="text-text-muted text-xs mt-2">Cuota {formatOdds(bet.odds)}</p>
-                    <p className="text-win font-semibold text-sm mt-1">
-                      Potencial: {formatPoints(bet.potential_win)}
+                  <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 sm:gap-0 w-full sm:w-auto border-t sm:border-t-0 border-border pt-3 sm:pt-0">
+                    <div>
+                      <p className="text-text-muted text-xs mb-0.5">Apostado</p>
+                      <p className="text-text-primary font-bold">{formatPoints(bet.amount)} pts</p>
+                      <p className="text-text-muted text-xs">Cuota {formatOdds(bet.odds)}</p>
+                    </div>
+                    <p className="text-win font-semibold text-sm">
+                      Pot.: {formatPoints(bet.potential_win)}
                     </p>
                   </div>
                 </div>

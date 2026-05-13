@@ -9,7 +9,7 @@ export default function HomePage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative pt-32 pb-20 px-4 text-center overflow-hidden">
+      <section className="relative pt-20 sm:pt-32 pb-12 sm:pb-20 px-4 text-center overflow-hidden">
         {/* Background effects */}
         <div className="absolute inset-0 bg-accent-glow opacity-30 pointer-events-none" />
         <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-accent/5 rounded-full blur-3xl pointer-events-none" />
@@ -20,7 +20,7 @@ export default function HomePage() {
             <span className="text-accent text-xs font-semibold">🎯 100% Puntos Virtuales — Sin dinero real</span>
           </div>
 
-          <h1 className="font-display font-black text-6xl sm:text-7xl md:text-8xl text-text-primary leading-none mb-6 tracking-tight">
+          <h1 className="font-display font-black text-4xl sm:text-6xl md:text-8xl text-text-primary leading-none mb-6 tracking-tight">
             PREDICE.
             <br />
             <span className="text-gradient-accent">COMPITE.</span>
@@ -50,7 +50,7 @@ export default function HomePage() {
 
       {/* Stats bar */}
       <section className="border-y border-border bg-surface/50 py-6 px-4">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 text-center">
           {[
             { value: "4+", label: "Deportes" },
             { value: "1.000", label: "Puntos iniciales" },
@@ -68,10 +68,10 @@ export default function HomePage() {
       {/* Features */}
       <section className="py-20 px-4">
         <div className="max-w-5xl mx-auto">
-          <h2 className="font-display font-black text-4xl text-center text-text-primary mb-12">
+          <h2 className="font-display font-black text-2xl sm:text-3xl md:text-4xl text-center text-text-primary mb-8 sm:mb-12">
             ¿Cómo funciona?
           </h2>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
             {[
               {
                 icon: <Zap className="text-accent" size={24} />,
@@ -111,9 +111,9 @@ export default function HomePage() {
 
       {/* CTA */}
       <section className="py-20 px-4 text-center">
-        <div className="max-w-2xl mx-auto bg-surface border border-accent/20 rounded-3xl p-10 relative overflow-hidden">
+        <div className="max-w-2xl mx-auto bg-surface border border-accent/20 rounded-3xl p-6 sm:p-10 relative overflow-hidden">
           <div className="absolute inset-0 bg-accent-glow opacity-20 pointer-events-none" />
-          <h2 className="font-display font-black text-4xl text-text-primary mb-4 relative">
+          <h2 className="font-display font-black text-2xl sm:text-3xl md:text-4xl text-text-primary mb-4 relative">
             ¿Listo para competir?
           </h2>
           <p className="text-text-secondary mb-8 relative">

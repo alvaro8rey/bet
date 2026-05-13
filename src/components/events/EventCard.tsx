@@ -53,37 +53,37 @@ export function EventCard({ event, onBet, hasActiveBet, compact }: EventCardProp
         </div>
 
         {/* Teams */}
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-2 mb-4">
           {/* Home */}
           <div className="flex-1 text-center">
-            <div className="w-10 h-10 mx-auto mb-2 bg-surface-2 rounded-xl flex items-center justify-center text-xl border border-border">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-1.5 bg-surface-2 rounded-xl flex items-center justify-center text-base sm:text-xl border border-border">
               🏠
             </div>
-            <p className="text-text-primary font-semibold text-sm leading-tight">{event.home_team}</p>
+            <p className="text-text-primary font-semibold text-xs sm:text-sm leading-tight">{event.home_team}</p>
           </div>
 
           {/* Score / VS */}
-          <div className="flex-shrink-0 text-center px-2">
+          <div className="flex-shrink-0 text-center px-1">
             {event.status === "finished" && event.home_score !== null ? (
-              <div className="bg-surface-2 rounded-xl px-4 py-2 border border-border">
-                <span className="text-text-primary font-bold text-xl">
+              <div className="bg-surface-2 rounded-xl px-2 sm:px-4 py-1.5 sm:py-2 border border-border">
+                <span className="text-text-primary font-bold text-base sm:text-xl">
                   {event.home_score} — {event.away_score}
                 </span>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-0.5">
                 <span className="text-text-muted text-xs">VS</span>
-                <div className="w-8 h-0.5 bg-border rounded" />
+                <div className="w-6 h-0.5 bg-border rounded" />
               </div>
             )}
           </div>
 
           {/* Away */}
           <div className="flex-1 text-center">
-            <div className="w-10 h-10 mx-auto mb-2 bg-surface-2 rounded-xl flex items-center justify-center text-xl border border-border">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-1.5 bg-surface-2 rounded-xl flex items-center justify-center text-base sm:text-xl border border-border">
               ✈️
             </div>
-            <p className="text-text-primary font-semibold text-sm leading-tight">{event.away_team}</p>
+            <p className="text-text-primary font-semibold text-xs sm:text-sm leading-tight">{event.away_team}</p>
           </div>
         </div>
 
@@ -160,15 +160,15 @@ function OddsButton({ label, sublabel, odds, disabled, onClick }: OddsButtonProp
       onClick={onClick}
       disabled={disabled}
       className={`
-        flex flex-col items-center gap-0.5 py-2.5 px-3 rounded-xl border transition-all duration-200
+        flex flex-col items-center gap-0.5 py-2 sm:py-2.5 px-2 sm:px-3 rounded-xl border transition-all duration-200
         ${disabled
           ? "border-border bg-surface-2 opacity-50 cursor-not-allowed"
           : "border-border bg-surface-2 hover:border-accent hover:bg-accent-muted hover:shadow-accent-sm active:scale-95 cursor-pointer"
         }
       `}
     >
-      <span className="text-text-muted text-xs font-medium">{label}</span>
-      <span className="text-accent font-bold text-lg leading-none">{formatOdds(odds)}</span>
+      <span className="text-text-muted text-[10px] sm:text-xs font-medium">{label}</span>
+      <span className="text-accent font-bold text-base sm:text-lg leading-none">{formatOdds(odds)}</span>
       <span className="text-text-muted text-[10px] truncate max-w-full">{sublabel}</span>
     </button>
   );
