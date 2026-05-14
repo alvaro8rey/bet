@@ -1,18 +1,13 @@
-import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
-import { ChevronLeft } from "lucide-react";
+import { BackButton } from "@/components/ui/BackButton";
+import Link from "next/link";
 
 export default function LegalLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="max-w-3xl mx-auto px-4 pt-28 pb-20">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-text-muted hover:text-text-primary text-sm mb-8 transition-colors"
-        >
-          <ChevronLeft size={14} /> Volver al inicio
-        </Link>
+        <BackButton fallback="/dashboard" />
         {children}
       </main>
       <footer className="border-t border-border py-6 px-4 text-center">

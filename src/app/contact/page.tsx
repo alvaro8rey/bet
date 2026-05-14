@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
-import { ChevronLeft, Mail, Clock, MessageSquare } from "lucide-react";
+import { BackButton } from "@/components/ui/BackButton";
+import { Mail, Clock, MessageSquare } from "lucide-react";
 
 export const metadata = { title: "Contacto — SharpBet" };
 
@@ -9,12 +10,7 @@ export default function ContactPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="max-w-2xl mx-auto px-4 pt-28 pb-20">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-text-muted hover:text-text-primary text-sm mb-8 transition-colors"
-        >
-          <ChevronLeft size={14} /> Volver al inicio
-        </Link>
+        <BackButton fallback="/dashboard" />
 
         <h1 className="font-display font-black text-3xl text-text-primary mb-2">Contacto</h1>
         <p className="text-text-secondary text-sm mb-10">
