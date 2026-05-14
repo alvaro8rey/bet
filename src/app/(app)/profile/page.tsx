@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { formatPoints, formatDate, getWinRateColor } from "@/utils";
 import { LogoutButton } from "@/components/profile/LogoutButton";
+import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import Link from "next/link";
 
 export default async function ProfilePage() {
@@ -46,33 +47,8 @@ export default async function ProfilePage() {
   return (
       <div className="space-y-6 animate-fade-in">
         {/* Profile header */}
-        <Card className="p-6">
-          <div className="flex items-center gap-5">
-            <div className="w-20 h-20 bg-gradient-to-br from-accent to-blue rounded-2xl flex items-center justify-center flex-shrink-0 shadow-accent">
-              <span className="text-background font-display font-black text-3xl">
-                {profile?.username?.[0]?.toUpperCase()}
-              </span>
-            </div>
-            <div>
-              <h1 className="font-display font-black text-3xl text-text-primary">{profile?.username}</h1>
-              <p className="text-text-muted text-sm">{user.email}</p>
-              <p className="text-text-muted text-xs mt-1">
-                Miembro desde {profile ? formatDate(profile.created_at) : "—"}
-              </p>
-              {profile?.is_admin && (
-                <span className="inline-block mt-2 px-2 py-0.5 bg-blue-muted border border-blue/20 text-blue text-xs rounded-lg font-medium">
-                  👑 Admin
-                </span>
-              )}
-            </div>
-            <div className="ml-auto flex flex-col items-end gap-3 hidden sm:flex">
-              <LogoutButton />
-              <Link href="/earn" className="text-right group">
-                <p className="text-accent font-bold text-3xl group-hover:text-accent/80 transition-colors">{formatPoints(profile?.points || 0)}</p>
-                <p className="text-text-muted text-sm group-hover:text-accent/60 transition-colors">puntos actuales ↗</p>
-              </Link>
-            </div>
-          </div>
+        <Card className="p-6 relative">
+          {profile && <ProfileEditor profile={profile} email={user.email ?? ""} />}
           {/* Mobile points & logout */}
           <div className="sm:hidden mt-4 pt-4 border-t border-border space-y-3">
             <Link href="/earn" className="block text-center group">
