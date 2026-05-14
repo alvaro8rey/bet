@@ -40,9 +40,39 @@ export function UpcomingEvents({ events, profile, hasActiveBet }: UpcomingEvents
                 <span className="text-xs">{formatDateShort(event.event_date)}</span>
               </div>
             </div>
-            <p className="text-text-primary text-sm font-semibold text-center">
-              {event.home_team} <span className="text-text-muted font-normal mx-2">vs</span> {event.away_team}
-            </p>
+            <div className="flex items-center justify-between gap-2 mb-1">
+              {/* Home */}
+              <div className="flex-1 flex flex-col items-center gap-1">
+                <div className="w-7 h-7">
+                  {event.home_team_logo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={event.home_team_logo} alt={event.home_team} className="w-full h-full object-contain" />
+                  ) : (
+                    <div className="w-full h-full bg-surface-2 rounded-lg flex items-center justify-center text-sm border border-border">
+                      {getSportIcon(event.sport)}
+                    </div>
+                  )}
+                </div>
+                <p className="text-text-primary text-xs font-semibold text-center leading-tight line-clamp-1">{event.home_team}</p>
+              </div>
+
+              <span className="text-text-muted text-xs font-normal shrink-0">vs</span>
+
+              {/* Away */}
+              <div className="flex-1 flex flex-col items-center gap-1">
+                <div className="w-7 h-7">
+                  {event.away_team_logo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={event.away_team_logo} alt={event.away_team} className="w-full h-full object-contain" />
+                  ) : (
+                    <div className="w-full h-full bg-surface-2 rounded-lg flex items-center justify-center text-sm border border-border">
+                      {getSportIcon(event.sport)}
+                    </div>
+                  )}
+                </div>
+                <p className="text-text-primary text-xs font-semibold text-center leading-tight line-clamp-1">{event.away_team}</p>
+              </div>
+            </div>
             <div className="flex gap-2 mt-3">
               <DashboardOddsButton
                 label="1"
