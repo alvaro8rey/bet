@@ -13,7 +13,8 @@ export default async function LeaderboardPage() {
   const { data: profiles } = await supabase
     .from("profiles")
     .select("user_id, username, points, total_bets, won_bets, avatar_url")
-    .order("points", { ascending: false })
+    .order("won_bets", { ascending: false })
+    .order("total_bets", { ascending: true }) // desempate: menos apuestas totales = mejor ratio
     .limit(50);
 
   const currentProfile = profiles?.find((p) => p.user_id === user.id);
@@ -30,7 +31,7 @@ export default async function LeaderboardPage() {
       <div className="space-y-6 animate-fade-in">
         <div>
           <h1 className="font-display font-black text-3xl text-text-primary mb-1">Clasificación</h1>
-          <p className="text-text-muted text-sm">Top predictores por puntos acumulados</p>
+          <p className="text-text-muted text-sm">Top predictores por apuestas acertadas</p>
         </div>
 
         {/* My rank card */}
@@ -49,8 +50,9 @@ export default async function LeaderboardPage() {
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-accent font-bold text-2xl">{formatPoints(currentProfile.points)}</p>
-                <p className="text-text-muted text-xs">puntos</p>
+                <p className="text-accent font-bold text-2xl">{currentProfile.won_bets}</p>
+                <p className="text-text-muted text-xs">acertadas</p>
+                <p className="text-text-muted text-[10px]">{formatPoints(currentProfile.points)} pts</p>
               </div>
             </div>
           </Card>
@@ -100,12 +102,12 @@ export default async function LeaderboardPage() {
                     </div>
                   </div>
 
-                  {/* Points */}
-                  <div className="text-right">
+                  {/* Won bets */}
+                  <div className="text-right shrink-0">
                     <p className={`font-bold text-sm sm:text-base ${rank <= 3 ? "text-accent" : "text-text-primary"}`}>
-                      {formatPoints(profile.points)}
+                      {profile.won_bets}
                     </p>
-                    <p className="text-text-muted text-xs">pts</p>
+                    <p className="text-text-muted text-xs">acertadas</p>
                   </div>
                 </div>
               </Card>
