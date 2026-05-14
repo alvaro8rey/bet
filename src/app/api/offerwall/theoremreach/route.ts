@@ -6,17 +6,30 @@ import crypto from "crypto";
 // Real params: user_id, reward, tx_id, status, hash
 // hash = Base64(HMAC-SHA1(secret_key, reward + tx_id + user_id))
 
+function toBase64Url(b64: string): string {
+  return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
 function verifyHash(userId: string, reward: string, txId: string, received: string): boolean {
   const secret = process.env.THEOREM_REACH_SECRET;
   if (!secret) {
     console.error("THEOREM_REACH_SECRET not configured");
     return false;
   }
-  const payload = reward + txId + userId;
-  const expected = crypto.createHmac("sha1", secret).update(payload).digest("base64");
-  // base64url vs base64: replace + with - and / with _
-  const expectedUrl = expected.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  return expected === received || expectedUrl === received;
+  // Try all likely payload orderings
+  const candidates = [
+    reward + txId + userId,
+    userId + reward + txId,
+    txId + userId + reward,
+    userId + txId + reward,
+  ];
+  for (const payload of candidates) {
+    const raw = crypto.createHmac("sha1", secret).update(payload).digest("base64");
+    const urlSafe = toBase64Url(raw);
+    console.log(`TheoremReach hash attempt [${payload.slice(0, 20)}...]: raw=${raw} url=${urlSafe} received=${received}`);
+    if (raw === received || urlSafe === received) return true;
+  }
+  return false;
 }
 
 export async function GET(request: NextRequest) {
