@@ -86,9 +86,9 @@ export default function ImportEventsPage() {
 
   useEffect(() => { loadEvents(); }, [loadEvents]);
 
-  const fetchTeamLogo = async (teamName: string): Promise<string | null> => {
+  const fetchTeamLogo = async (teamName: string, sport: string): Promise<string | null> => {
     try {
-      const res = await fetch(`/api/team-logo?team=${encodeURIComponent(teamName)}`);
+      const res = await fetch(`/api/team-logo?team=${encodeURIComponent(teamName)}&sport=${encodeURIComponent(sport)}`);
       if (!res.ok) return null;
       const data = await res.json();
       return data.url ?? null;
@@ -101,8 +101,8 @@ export default function ImportEventsPage() {
     setImportingId(event.api_id);
     try {
       const [homeLogo, awayLogo] = await Promise.all([
-        fetchTeamLogo(event.home_team),
-        fetchTeamLogo(event.away_team),
+        fetchTeamLogo(event.home_team, event.our_sport),
+        fetchTeamLogo(event.away_team, event.our_sport),
       ]);
 
       const { error } = await supabase.from("events").insert({
