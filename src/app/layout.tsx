@@ -25,6 +25,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9606090335798660"
+          crossOrigin="anonymous"
+        />
       </head>
       <body className="antialiased bg-background text-text-primary">
         {children}
