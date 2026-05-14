@@ -68,10 +68,12 @@ const emailTemplate = (data: RedemptionEmailRequest, statusInfo: any) => `
     .key-note { color: #52525b; font-size: 12px; margin-top: 8px; }
     .details { background: #fafafa; border: 1px solid #e4e4e7; border-radius: 10px; padding: 16px; margin-bottom: 20px; }
     .details-title { font-size: 13px; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
-    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e4e4e7; font-size: 14px; }
-    .detail-row:last-child { border-bottom: none; padding-bottom: 0; }
-    .detail-label { color: #71717a; }
-    .detail-value { font-weight: 600; color: #18181b; }
+    .detail-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .detail-table tr { border-bottom: 1px solid #e4e4e7; }
+    .detail-table tr:last-child { border-bottom: none; }
+    .detail-table td { padding: 8px 0; }
+    .detail-label { color: #71717a; white-space: nowrap; padding-right: 16px; }
+    .detail-value { font-weight: 600; color: #18181b; text-align: right; }
     .points-value { color: #00e676; }
     .help { font-size: 13px; color: #71717a; line-height: 1.6; margin-bottom: 20px; }
     .help a { color: #00e676; text-decoration: none; }
@@ -113,18 +115,20 @@ const emailTemplate = (data: RedemptionEmailRequest, statusInfo: any) => `
 
         <div class="details">
           <div class="details-title">Detalles del premio</div>
-          <div class="detail-row">
-            <span class="detail-label">Nombre:</span>
-            <span class="detail-value">${data.nombre}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Premio:</span>
-            <span class="detail-value">${data.reward_nombre}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Puntos utilizados:</span>
-            <span class="detail-value points-value">${data.puntos.toLocaleString("es-ES")} pts</span>
-          </div>
+          <table class="detail-table">
+            <tr>
+              <td class="detail-label">Nombre:</td>
+              <td class="detail-value">${data.nombre}</td>
+            </tr>
+            <tr>
+              <td class="detail-label">Premio:</td>
+              <td class="detail-value">${data.reward_nombre}</td>
+            </tr>
+            <tr>
+              <td class="detail-label">Puntos utilizados:</td>
+              <td class="detail-value points-value">${data.puntos.toLocaleString("es-ES")} pts</td>
+            </tr>
+          </table>
         </div>
 
         <p class="help">
