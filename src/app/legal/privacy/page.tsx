@@ -1,4 +1,11 @@
-export const metadata = { title: "Política de privacidad — SharpBet" };
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Política de privacidad — SharpBet",
+  description: "Política de privacidad y tratamiento de datos personales de SharpBet conforme al RGPD.",
+  alternates: { canonical: "https://www.sharpbet.es/legal/privacy" },
+  robots: { index: true, follow: false },
+};
 
 export default function PrivacyPage() {
   return (

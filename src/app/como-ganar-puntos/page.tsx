@@ -1,10 +1,25 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { BackButton } from "@/components/ui/BackButton";
 import { Trophy, Zap, Gift, TrendingUp, Star, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
-export const metadata = { title: "Cómo ganar puntos — SharpBet" };
+export const metadata: Metadata = {
+  title: "Cómo ganar puntos — SharpBet | Guía completa",
+  description:
+    "Aprende todas las formas de ganar puntos en SharpBet: predicciones deportivas, tareas y encuestas, puntos de bienvenida y recuperación tras quiebra.",
+  keywords: ["ganar puntos SharpBet", "predicciones deportivas puntos", "encuestas puntos gratis"],
+  alternates: { canonical: "https://www.sharpbet.es/como-ganar-puntos" },
+  openGraph: {
+    title: "Cómo ganar puntos en SharpBet",
+    description: "Guía completa de todas las formas de acumular puntos para canjear premios.",
+    url: "https://www.sharpbet.es/como-ganar-puntos",
+    siteName: "SharpBet",
+    locale: "es_ES",
+    type: "article",
+  },
+};
 
 export default function ComoGanarPuntosPage() {
   return (

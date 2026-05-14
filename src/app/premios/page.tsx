@@ -1,9 +1,36 @@
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
 import { formatPoints } from "@/utils";
-import { Gift, Lock } from "lucide-react";
+import { Gift, Lock, ShoppingBag, Gamepad2, Star, Zap } from "lucide-react";
 import Link from "next/link";
+
+const base = "https://www.sharpbet.es";
+
+export const metadata: Metadata = {
+  title: "Premios — SharpBet | Canjea puntos por Amazon, Steam, PSN y más",
+  description:
+    "Catálogo completo de premios de SharpBet: tarjetas regalo Amazon, Steam, PlayStation, Google Play, PayPal, Spotify, El Corte Inglés y FNAC. Canjea tus puntos hoy.",
+  keywords: [
+    "canjear puntos premios",
+    "tarjeta regalo Amazon puntos",
+    "Steam gift card gratis",
+    "PSN puntos gratis",
+    "premios predicciones deportivas",
+    "recompensas apuestas virtuales",
+  ],
+  alternates: { canonical: `${base}/premios` },
+  openGraph: {
+    title: "Premios SharpBet — Canjea puntos por Amazon, Steam, PSN y más",
+    description: "Catálogo completo de premios canjeables con puntos virtuales. Sin dinero real.",
+    url: `${base}/premios`,
+    siteName: "SharpBet",
+    locale: "es_ES",
+    type: "website",
+    images: [{ url: `${base}/logo-white.png`, width: 512, height: 512, alt: "SharpBet Premios" }],
+  },
+};
 
 interface Reward {
   id: number;
@@ -14,6 +41,29 @@ interface Reward {
   valor_euros: number;
   imagen_url?: string;
 }
+
+const jsonLdItemList = (rewards: Reward[]) => ({
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "Catálogo de premios SharpBet",
+  description: "Premios canjeables con puntos virtuales de SharpBet",
+  url: `${base}/premios`,
+  numberOfItems: rewards.length,
+  itemListElement: rewards.map((r, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name: r.nombre,
+    description: r.descripcion,
+    url: `${base}/premios`,
+  })),
+});
+
+const FEATURES = [
+  { icon: ShoppingBag, label: "Tarjetas regalo", examples: "Amazon, FNAC, El Corte Inglés" },
+  { icon: Gamepad2, label: "Gaming", examples: "Steam, PSN, Xbox" },
+  { icon: Star, label: "Digital premium", examples: "Spotify, Google Play, PayPal" },
+  { icon: Zap, label: "Sin dinero real", examples: "100% gratis, sin riesgo" },
+];
 
 export default async function PremiosPublicPage() {
   const supabase = await createClient();
@@ -28,6 +78,12 @@ export default async function PremiosPublicPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {rewards && rewards.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdItemList(rewards)) }}
+        />
+      )}
       <Navbar />
 
       <div className="max-w-5xl mx-auto px-4 pt-24 pb-16">
@@ -38,14 +94,25 @@ export default async function PremiosPublicPage() {
             <span className="text-accent text-xs font-semibold">Catálogo de premios</span>
           </div>
           <h1 className="font-display font-black text-3xl sm:text-5xl text-text-primary mb-3">
-            Premios reales
+            Premios reales con tus puntos
           </h1>
           <p className="text-text-secondary max-w-xl mx-auto text-sm sm:text-base mb-6">
-            Acumula puntos prediciendo resultados deportivos o completando tareas y canjéalos por estos premios.
+            Haz predicciones deportivas, acumula puntos y canjéalos por tarjetas regalo de Amazon, Steam, PSN, Google Play, PayPal y muchos más. <strong className="text-text-primary">Sin dinero real.</strong>
           </p>
           <Link href="/auth/register">
             <Button size="lg">Empezar gratis — 1.000 puntos</Button>
           </Link>
+        </div>
+
+        {/* Feature chips */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
+          {FEATURES.map(({ icon: Icon, label, examples }) => (
+            <div key={label} className="bg-surface border border-border rounded-xl p-4 text-center">
+              <Icon size={20} className="text-accent mx-auto mb-2" />
+              <p className="font-semibold text-text-primary text-xs mb-0.5">{label}</p>
+              <p className="text-text-muted text-[10px]">{examples}</p>
+            </div>
+          ))}
         </div>
 
         {/* Rewards sections */}

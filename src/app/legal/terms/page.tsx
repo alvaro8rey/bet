@@ -1,4 +1,11 @@
-export const metadata = { title: "Términos y condiciones — SharpBet" };
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Términos y condiciones — SharpBet",
+  description: "Términos y condiciones de uso de SharpBet, plataforma de predicciones deportivas con puntos virtuales.",
+  alternates: { canonical: "https://www.sharpbet.es/legal/terms" },
+  robots: { index: true, follow: false },
+};
 
 export default function TermsPage() {
   return (

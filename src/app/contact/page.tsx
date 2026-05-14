@@ -1,9 +1,22 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { BackButton } from "@/components/ui/BackButton";
 import { Mail, Clock, MessageSquare } from "lucide-react";
 
-export const metadata = { title: "Contacto — SharpBet" };
+export const metadata: Metadata = {
+  title: "Contacto — SharpBet",
+  description: "Contacta con el equipo de SharpBet para resolver dudas, reportar problemas o hacer sugerencias. Respondemos en menos de 48 horas.",
+  alternates: { canonical: "https://www.sharpbet.es/contact" },
+  openGraph: {
+    title: "Contacto — SharpBet",
+    description: "¿Tienes alguna pregunta? Contacta con nuestro equipo.",
+    url: "https://www.sharpbet.es/contact",
+    siteName: "SharpBet",
+    locale: "es_ES",
+    type: "website",
+  },
+};
 
 export default function ContactPage() {
   return (

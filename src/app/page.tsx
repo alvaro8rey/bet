@@ -1,11 +1,61 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Navbar } from "@/components/layout/Navbar";
 import { Trophy, Zap, Gift, ChevronRight, Star, Gamepad2, ShoppingBag, Smartphone } from "lucide-react";
 
+const base = "https://www.sharpbet.es";
+
+export const metadata: Metadata = {
+  title: "SharpBet — Predicciones Deportivas Gratis | Gana Premios Reales",
+  description:
+    "Haz predicciones deportivas gratis, acumula puntos y canjéalos por Amazon, Steam, PSN y más. Sin dinero real, sin riesgo. ¡1.000 puntos de bienvenida!",
+  keywords: [
+    "predicciones deportivas gratis",
+    "apuestas virtuales",
+    "ganar premios con puntos",
+    "tarjetas regalo Amazon",
+    "fantasy deportivo",
+    "fútbol predicciones",
+  ],
+  alternates: { canonical: base },
+  openGraph: {
+    title: "SharpBet — Predicciones Deportivas Gratis | Gana Premios Reales",
+    description: "Haz predicciones deportivas, acumula puntos y canjéalos por premios reales. Sin dinero real.",
+    url: base,
+    siteName: "SharpBet",
+    locale: "es_ES",
+    type: "website",
+    images: [{ url: `${base}/logo-white.png`, width: 512, height: 512, alt: "SharpBet" }],
+  },
+  twitter: {
+    card: "summary",
+    title: "SharpBet — Predicciones Deportivas Gratis",
+    description: "Predice resultados deportivos y gana premios reales sin dinero real.",
+    images: [`${base}/logo-white.png`],
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "SharpBet",
+  url: base,
+  description: "Plataforma de predicciones deportivas con puntos virtuales y premios reales.",
+  potentialAction: {
+    "@type": "RegisterAction",
+    target: `${base}/auth/register`,
+    name: "Crear cuenta gratis",
+  },
+};
+
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background overflow-hidden">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
 
       {/* Hero */}

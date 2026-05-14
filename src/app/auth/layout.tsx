@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
+
+export const metadata: Metadata = {
+  title: "Acceder — SharpBet",
+  description: "Accede a tu cuenta de SharpBet o regístrate gratis para empezar a hacer predicciones deportivas y ganar premios.",
+  robots: { index: true, follow: true },
+};
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
