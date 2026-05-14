@@ -41,6 +41,7 @@ export default async function DashboardPage() {
     .from("events")
     .select("*")
     .eq("status", "pending")
+    .gt("event_date", new Date().toISOString())
     .order("event_date", { ascending: true })
     .limit(4);
 

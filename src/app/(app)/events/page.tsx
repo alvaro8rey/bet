@@ -39,7 +39,7 @@ export default function EventsPage() {
     let query = supabase.from("events").select("*").order("event_date", { ascending: true });
 
     if (filter === "pending") {
-      query = query.in("status", ["pending", "live"]);
+      query = query.in("status", ["pending", "live"]).gt("event_date", new Date().toISOString());
     } else {
       query = query.in("status", ["finished", "cancelled"]);
     }
