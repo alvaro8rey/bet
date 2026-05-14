@@ -10,43 +10,58 @@ function toBase64Url(b64: string): string {
   return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-function verifyHash(userId: string, reward: string, txId: string, received: string): boolean {
+function verifyHash(userId: string, reward: string, txId: string, received: string, fullUrl: string): boolean {
   const secret = process.env.THEOREM_REACH_SECRET;
+  const apiKey = process.env.THEOREM_REACH_API_KEY ?? "";
   if (!secret) {
     console.error("THEOREM_REACH_SECRET not configured");
     return false;
   }
-  const apiKey = process.env.THEOREM_REACH_API_KEY ?? "";
-  const rewardFloat = parseFloat(reward).toFixed(1); // "1000.0"
-  const candidates = [
-    // integer reward
+
+  const rewardFloat = parseFloat(reward).toFixed(1);
+
+  // HMAC-SHA1 candidates
+  const hmacCandidates = [
     reward + txId + userId,
     userId + reward + txId,
-    txId + userId + reward,
-    // float reward
     rewardFloat + txId + userId,
     userId + rewardFloat + txId,
-    txId + userId + rewardFloat,
-    // with api_key
     apiKey + userId + reward + txId,
-    apiKey + reward + txId + userId,
-    // only tx_id + user_id
-    txId + userId,
-    userId + txId,
   ];
-  for (const payload of candidates) {
+
+  for (const payload of hmacCandidates) {
     const raw = crypto.createHmac("sha1", secret).update(payload).digest("base64");
-    const urlSafe = toBase64Url(raw);
-    console.log(`TheoremReach hash attempt [${payload.slice(0, 20)}...]: raw=${raw} url=${urlSafe} received=${received}`);
-    if (raw === received || urlSafe === received) return true;
+    const url = toBase64Url(raw);
+    if (raw === received || url === received) {
+      console.log(`✅ HMAC-SHA1 match: "${payload.slice(0, 30)}..."`);
+      return true;
+    }
   }
+
+  // Plain SHA1 candidates (data + secret concatenated)
+  const sha1Candidates = [
+    reward + txId + userId + secret,
+    userId + reward + txId + secret,
+    txId + userId + secret,
+    fullUrl + secret,
+  ];
+
+  for (const payload of sha1Candidates) {
+    const raw = crypto.createHash("sha1").update(payload).digest("base64");
+    const url = toBase64Url(raw);
+    console.log(`SHA1 attempt [${payload.slice(0, 30)}...]: url=${url} received=${received}`);
+    if (raw === received || url === received) {
+      console.log(`✅ SHA1 match: "${payload.slice(0, 30)}..."`);
+      return true;
+    }
+  }
+
   return false;
 }
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-
-  console.log("TheoremReach postback params:", Object.fromEntries(searchParams));
+  const parsed = new URL(request.url);
+  const { searchParams } = parsed;
 
   const userId = searchParams.get("user_id");
   const reward = searchParams.get("reward");
@@ -59,12 +74,15 @@ export async function GET(request: NextRequest) {
     return new NextResponse("missing_params", { status: 400 });
   }
 
-  // status=1 completed, screenout != completed — only credit status=1
+  // status=1 completed — only credit status=1
   if (status !== "1") {
     return new NextResponse("1", { status: 200 });
   }
 
-  if (hash && !verifyHash(userId, reward, txId, hash)) {
+  // Build URL without the hash param for full-url hashing attempt
+  const urlWithoutHash = parsed.toString().replace(/&hash=[^&]+/, "").replace(/\?hash=[^&]+&?/, "?");
+
+  if (hash && !verifyHash(userId, reward, txId, hash, urlWithoutHash)) {
     console.warn("TheoremReach invalid hash", { txId, hash });
     return new NextResponse("invalid_hash", { status: 403 });
   }
