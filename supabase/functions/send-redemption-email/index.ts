@@ -114,15 +114,15 @@ const emailTemplate = (data: RedemptionEmailRequest, statusInfo: any) => `
         <div class="details">
           <div class="details-title">Detalles del premio</div>
           <div class="detail-row">
-            <span class="detail-label">Nombre</span>
+            <span class="detail-label">Nombre:</span>
             <span class="detail-value">${data.nombre}</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Premio</span>
+            <span class="detail-label">Premio:</span>
             <span class="detail-value">${data.reward_nombre}</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Puntos utilizados</span>
+            <span class="detail-label">Puntos utilizados:</span>
             <span class="detail-value points-value">${data.puntos.toLocaleString("es-ES")} pts</span>
           </div>
         </div>
