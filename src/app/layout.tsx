@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   openGraph: {
     images: ["/logo-white.png"],
   },
+  verification: {
+    google: "faAuPdI7h4EARGwvuGwh86OxwntGiWcob0Y3cthN-zc",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
