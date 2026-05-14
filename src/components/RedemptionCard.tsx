@@ -32,7 +32,6 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
 
   const config = statusConfig[redemption.status as keyof typeof statusConfig];
   const Icon = config.icon;
-  const isFinal = redemption.status === "completed" || redemption.status === "cancelled";
 
   const updateStatus = async (newStatus: string, key?: string, reason?: string) => {
     setLoading(true);
@@ -213,7 +212,7 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
         <div className="flex items-center justify-between pt-3 border-t border-border text-xs text-text-muted">
           <span>{formatDateShort(redemption.created_at)} · {redemption.reward?.puntos_necesarios.toLocaleString()} pts</span>
 
-          {!isFinal && !showKeyInput && !showCancelInput && (
+          {!showKeyInput && !showCancelInput && (
             <div className="relative">
               <button
                 onClick={() => setShowActions(!showActions)}
