@@ -83,30 +83,23 @@ export async function GET(request: NextRequest) {
     return new NextResponse("1", { status: 200 });
   }
 
-  // Upsert with ignoreDuplicates — if the transaction already exists, skip silently
-  const { error: txError, data: inserted } = await supabase
+  const { error: txError } = await supabase
     .from("offerwall_transactions")
-    .upsert(
-      {
-        user_id: userId,
-        transaction_id: transId,
-        reward_points: amount,
-        provider: "cpx",
-        reversed: false,
-      },
-      { onConflict: "transaction_id", ignoreDuplicates: true }
-    )
-    .select("id")
-    .maybeSingle();
+    .insert({
+      user_id: userId,
+      transaction_id: transId,
+      reward_points: amount,
+      provider: "cpx",
+      reversed: false,
+    });
 
   if (txError) {
-    console.error("CPX tx upsert error:", txError);
+    // 23505 = unique_violation: already processed, return success
+    if (txError.code === "23505") {
+      return new NextResponse("1", { status: 200 });
+    }
+    console.error("CPX tx insert error:", JSON.stringify(txError));
     return new NextResponse("db_error", { status: 500 });
-  }
-
-  // If no row returned, it was a duplicate — already processed
-  if (!inserted) {
-    return new NextResponse("1", { status: 200 });
   }
 
   const { data: profile, error: profileError } = await supabase
