@@ -83,30 +83,30 @@ export async function GET(request: NextRequest) {
     return new NextResponse("1", { status: 200 });
   }
 
-  // Idempotency: skip already-processed transactions
-  const { data: existing } = await supabase
+  // Upsert with ignoreDuplicates — if the transaction already exists, skip silently
+  const { error: txError, data: inserted } = await supabase
     .from("offerwall_transactions")
+    .upsert(
+      {
+        user_id: userId,
+        transaction_id: transId,
+        reward_points: amount,
+        provider: "cpx",
+        reversed: false,
+      },
+      { onConflict: "transaction_id", ignoreDuplicates: true }
+    )
     .select("id")
-    .eq("transaction_id", transId)
     .maybeSingle();
 
-  if (existing) {
-    return new NextResponse("1", { status: 200 });
+  if (txError) {
+    console.error("CPX tx upsert error:", txError);
+    return new NextResponse("db_error", { status: 500 });
   }
 
-  const { error: txError } = await supabase
-    .from("offerwall_transactions")
-    .insert({
-      user_id: userId,
-      transaction_id: transId,
-      reward_points: amount,
-      provider: "cpx",
-      reversed: false,
-    });
-
-  if (txError) {
-    console.error("CPX tx insert error:", txError);
-    return new NextResponse("db_error", { status: 500 });
+  // If no row returned, it was a duplicate — already processed
+  if (!inserted) {
+    return new NextResponse("1", { status: 200 });
   }
 
   const { data: profile, error: profileError } = await supabase
