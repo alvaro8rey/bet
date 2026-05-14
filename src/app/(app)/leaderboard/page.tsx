@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/Card";
+import { Avatar } from "@/components/ui/Avatar";
 import { formatPoints, getWinRateColor } from "@/utils";
 import { Trophy, Medal } from "lucide-react";
 
@@ -11,7 +12,7 @@ export default async function LeaderboardPage() {
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("user_id, username, points, total_bets, won_bets")
+    .select("user_id, username, points, total_bets, won_bets, avatar_url")
     .order("points", { ascending: false })
     .limit(50);
 
@@ -36,11 +37,7 @@ export default async function LeaderboardPage() {
         {currentProfile && currentRank && (
           <Card glow className="p-5">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-accent to-blue rounded-2xl flex items-center justify-center flex-shrink-0">
-                <span className="text-background font-display font-black text-xl">
-                  {currentProfile.username?.[0]?.toUpperCase()}
-                </span>
-              </div>
+              <Avatar username={currentProfile.username} avatarUrl={(currentProfile as any).avatar_url} size="lg" isMe />
               <div className="flex-1">
                 <p className="text-text-muted text-xs font-medium mb-0.5">Tu posición</p>
                 <div className="flex items-center gap-2">
@@ -85,12 +82,8 @@ export default async function LeaderboardPage() {
                   </div>
 
                   {/* Avatar — hidden on xs to save space */}
-                  <div className={`hidden sm:flex w-10 h-10 rounded-xl items-center justify-center flex-shrink-0 ${
-                    isMe ? "bg-gradient-to-br from-accent to-blue" : "bg-surface-3"
-                  }`}>
-                    <span className={`font-bold text-sm ${isMe ? "text-background" : "text-text-secondary"}`}>
-                      {profile.username?.[0]?.toUpperCase()}
-                    </span>
+                  <div className="hidden sm:block">
+                    <Avatar username={profile.username} avatarUrl={(profile as any).avatar_url} size="md" isMe={isMe} />
                   </div>
 
                   {/* Info */}

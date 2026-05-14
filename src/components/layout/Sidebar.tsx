@@ -17,6 +17,7 @@ import {
   AlertTriangle,
   Zap,
 } from "lucide-react";
+import { Avatar } from "@/components/ui/Avatar";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -136,11 +137,7 @@ export function Sidebar() {
       {profile && (
         <div className="p-4 border-t border-border">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-accent to-blue rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-background text-sm font-bold">
-                {profile.username?.[0]?.toUpperCase()}
-              </span>
-            </div>
+            <Avatar username={profile.username} avatarUrl={profile.avatar_url} size="sm" isMe className="rounded-full" />
             <div className="min-w-0">
               <p className="text-text-primary text-sm font-medium truncate">{profile.username}</p>
               <p className="text-text-muted text-xs">{profile.won_bets}/{profile.total_bets} ganadas</p>

@@ -8,6 +8,7 @@ import { formatPoints } from "@/utils";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import toast from "react-hot-toast";
+import { Avatar } from "@/components/ui/Avatar";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -49,15 +50,8 @@ export function Navbar() {
               </div>
 
               {/* Profile */}
-              <Link
-                href="/profile"
-                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-              >
-                <div className="w-8 h-8 bg-gradient-to-br from-accent to-blue rounded-full flex items-center justify-center">
-                  <span className="text-background text-xs font-bold">
-                    {profile.username?.[0]?.toUpperCase() || "U"}
-                  </span>
-                </div>
+              <Link href="/profile" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <Avatar username={profile.username} avatarUrl={profile.avatar_url} size="sm" isMe className="rounded-full" />
                 <span className="hidden md:block text-sm text-text-secondary">{profile.username}</span>
               </Link>
 
