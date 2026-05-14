@@ -86,7 +86,7 @@ const emailTemplate = (data: RedemptionEmailRequest, statusInfo: any) => `
     <div class="card">
 
       <div class="header">
-        <div class="logo">⚡ SharpBet</div>
+        <img src="https://www.sharpbet.es/logo-white.png" alt="SharpBet" style="height:60px;width:auto;margin-bottom:4px;" />
         <div class="header-sub">Plataforma de predicciones deportivas</div>
       </div>
 

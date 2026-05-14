@@ -6,6 +6,13 @@ export const metadata: Metadata = {
   title: "SharpBet — Predicciones Deportivas",
   description: "Realiza predicciones deportivas con puntos virtuales. Sin dinero real.",
   keywords: ["predicciones deportivas", "apuestas virtuales", "fútbol", "tenis", "baloncesto"],
+  icons: {
+    icon: "/logo-white.png",
+    apple: "/logo-white.png",
+  },
+  openGraph: {
+    images: ["/logo-white.png"],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

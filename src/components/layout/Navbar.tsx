@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useProfile } from "@/hooks/useProfile";
 import { createClient } from "@/lib/supabase/client";
@@ -29,13 +30,8 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 h-16 bg-background/80 backdrop-blur-xl border-b border-border">
       <div className="h-full max-w-7xl mx-auto px-4 flex items-center justify-between">
         {/* Logo */}
-        <Link href={profile ? "/dashboard" : "/"} className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center shadow-accent-sm">
-            <span className="text-background font-display font-black text-lg leading-none">S</span>
-          </div>
-          <span className="font-display font-bold text-xl tracking-wide text-text-primary">
-            Sharp<span className="text-accent">Bet</span>
-          </span>
+        <Link href={profile ? "/dashboard" : "/"}>
+          <Image src="/logo-horizontal.png" alt="SharpBet" width={140} height={40} className="h-9 w-auto" priority />
         </Link>
 
         {/* Right side */}
