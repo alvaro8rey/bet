@@ -17,16 +17,22 @@ function verifyHash(userId: string, reward: string, txId: string, received: stri
     return false;
   }
   const apiKey = process.env.THEOREM_REACH_API_KEY ?? "";
-  // Try all likely payload orderings including api_key
+  const rewardFloat = parseFloat(reward).toFixed(1); // "1000.0"
   const candidates = [
+    // integer reward
     reward + txId + userId,
     userId + reward + txId,
     txId + userId + reward,
-    userId + txId + reward,
+    // float reward
+    rewardFloat + txId + userId,
+    userId + rewardFloat + txId,
+    txId + userId + rewardFloat,
+    // with api_key
     apiKey + userId + reward + txId,
     apiKey + reward + txId + userId,
-    userId + reward + txId + apiKey,
-    apiKey + txId + userId + reward,
+    // only tx_id + user_id
+    txId + userId,
+    userId + txId,
   ];
   for (const payload of candidates) {
     const raw = crypto.createHmac("sha1", secret).update(payload).digest("base64");
