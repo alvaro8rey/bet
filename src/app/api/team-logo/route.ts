@@ -16,24 +16,26 @@ interface FDTeam {
   crest: string;
 }
 
-function normalize(s: string) {
-  return s
-    .toLowerCase()
-    .replace(/\b(fc|cf|afc|sc|ac|as|ss|rc|rcd|ud|sd|cd|ca|real|atletico|athletic|club|de|la|el|los)\b/g, "")
-    .replace(/[^a-z0-9]/g, "")
-    .trim();
+function clean(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 function teamMatches(fd: FDTeam, query: string): boolean {
-  const q = normalize(query);
-  if (!q) return false;
-  return (
-    normalize(fd.name).includes(q) ||
-    q.includes(normalize(fd.name)) ||
-    normalize(fd.shortName).includes(q) ||
-    q.includes(normalize(fd.shortName)) ||
-    normalize(fd.tla) === q
-  );
+  const q = clean(query);
+  if (q.length < 3) return false;
+
+  const name = clean(fd.name);
+  const short = clean(fd.shortName);
+  const tla = clean(fd.tla);
+
+  // Exact clean match
+  if (name === q || short === q || tla === q) return true;
+
+  // One contains the other (both must be non-trivially long)
+  if (name.length >= 3 && (name.includes(q) || q.includes(name))) return true;
+  if (short.length >= 3 && (short.includes(q) || q.includes(short))) return true;
+
+  return false;
 }
 
 async function footballDataLogo(team: string): Promise<string | null> {
