@@ -30,10 +30,10 @@ export function Navbar() {
         {/* Logo */}
         <Link href={profile ? "/dashboard" : "/"} className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center shadow-accent-sm">
-            <span className="text-background font-display font-black text-lg leading-none">P</span>
+            <span className="text-background font-display font-black text-lg leading-none">S</span>
           </div>
           <span className="font-display font-bold text-xl tracking-wide text-text-primary">
-            Playful<span className="text-accent">Bet</span>
+            Sharp<span className="text-accent">Bet</span>
           </span>
         </Link>
 

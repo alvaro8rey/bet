@@ -135,7 +135,7 @@ export function Sidebar() {
       {/* Bottom user info */}
       {profile && (
         <div className="p-4 border-t border-border">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mb-3">
             <div className="w-9 h-9 bg-gradient-to-br from-accent to-blue rounded-full flex items-center justify-center flex-shrink-0">
               <span className="text-background text-sm font-bold">
                 {profile.username?.[0]?.toUpperCase()}
@@ -145,6 +145,18 @@ export function Sidebar() {
               <p className="text-text-primary text-sm font-medium truncate">{profile.username}</p>
               <p className="text-text-muted text-xs">{profile.won_bets}/{profile.total_bets} ganadas</p>
             </div>
+          </div>
+          <div className="flex flex-wrap gap-x-3 gap-y-1">
+            {[
+              { href: "/legal/terms", label: "Términos" },
+              { href: "/legal/privacy", label: "Privacidad" },
+              { href: "/contact", label: "Contacto" },
+              { href: "/como-ganar-puntos", label: "Cómo ganar puntos" },
+            ].map((l) => (
+              <Link key={l.href} href={l.href} className="text-[10px] text-text-muted hover:text-text-secondary transition">
+                {l.label}
+              </Link>
+            ))}
           </div>
         </div>
       )}
