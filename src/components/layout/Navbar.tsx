@@ -31,7 +31,7 @@ export function Navbar() {
       <div className="h-full max-w-7xl mx-auto px-4 flex items-center justify-between">
         {/* Logo */}
         <Link href={profile ? "/dashboard" : "/"}>
-          <Image src="/logo-horizontal.png" alt="SharpBet" width={140} height={40} className="h-9 w-auto" priority />
+          <Image src="/logo-horizontal-white.png" alt="SharpBet" width={180} height={52} className="h-11 w-auto" priority />
         </Link>
 
         {/* Right side */}
