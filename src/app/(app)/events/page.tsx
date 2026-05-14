@@ -1,26 +1,24 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { EventCard } from "@/components/events/EventCard";
 import { BetModal } from "@/components/bets/BetModal";
 import { PageLoader } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Button } from "@/components/ui/Button";
 import { useProfile } from "@/hooks/useProfile";
 import { useActiveBet } from "@/hooks/useActiveBet";
 import type { Event, BetResult, Sport } from "@/types";
-import { getSportLabel, getSportIcon } from "@/utils";
-import { Filter } from "lucide-react";
+import { Search, X } from "lucide-react";
 
-const SPORTS: { value: Sport | "all"; label: string }[] = [
-  { value: "all", label: "Todos" },
-  { value: "football", label: "Fútbol" },
-  { value: "tennis", label: "Tenis" },
-  { value: "basketball", label: "Baloncesto" },
-  { value: "baseball", label: "Béisbol" },
-  { value: "volleyball", label: "Voleibol" },
-  { value: "other", label: "Otro" },
+const SPORTS: { value: Sport | "all"; label: string; icon: string }[] = [
+  { value: "all",        label: "Todos",      icon: "🏆" },
+  { value: "football",   label: "Fútbol",     icon: "⚽" },
+  { value: "basketball", label: "Baloncesto", icon: "🏀" },
+  { value: "tennis",     label: "Tenis",      icon: "🎾" },
+  { value: "baseball",   label: "Béisbol",    icon: "⚾" },
+  { value: "volleyball", label: "Voleibol",   icon: "🏐" },
+  { value: "other",      label: "Otro",       icon: "🎯" },
 ];
 
 export default function EventsPage() {
@@ -28,6 +26,8 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"pending" | "finished">("pending");
   const [sportFilter, setSportFilter] = useState<Sport | "all">("all");
+  const [leagueFilter, setLeagueFilter] = useState<string>("all");
+  const [search, setSearch] = useState("");
   const [selectedBet, setSelectedBet] = useState<{ event: Event; prediction: BetResult } | null>(null);
   const { profile, refetch: refetchProfile } = useProfile();
   const { activeBet, refetch: refetchActiveBet } = useActiveBet();
@@ -49,12 +49,33 @@ export default function EventsPage() {
 
     const { data } = await query;
     setEvents(data || []);
+    setLeagueFilter("all");
     setLoading(false);
   }, [filter, sportFilter, supabase]);
 
-  useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+  useEffect(() => { fetchEvents(); }, [fetchEvents]);
+
+  // Leagues available for the current sport filter
+  const leagues = useMemo(() => {
+    const set = new Set(events.map((e) => e.competition));
+    return Array.from(set).sort();
+  }, [events]);
+
+  // Client-side league + search filter
+  const visibleEvents = useMemo(() => {
+    return events.filter((e) => {
+      if (leagueFilter !== "all" && e.competition !== leagueFilter) return false;
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        return (
+          e.home_team.toLowerCase().includes(q) ||
+          e.away_team.toLowerCase().includes(q) ||
+          e.competition.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    });
+  }, [events, leagueFilter, search]);
 
   const handleBetSuccess = () => {
     refetchProfile();
@@ -64,53 +85,93 @@ export default function EventsPage() {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-5">
         <div>
           <h1 className="font-display font-black text-3xl text-text-primary mb-1">Eventos</h1>
           <p className="text-text-muted text-sm">Elige un evento y realiza tu predicción</p>
         </div>
 
-        {/* Filters */}
+        {/* ── Filters ── */}
         <div className="flex flex-col gap-3">
-          {/* Status filter */}
+
+          {/* Status */}
           <div className="flex gap-2">
-            <button
-              onClick={() => setFilter("pending")}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                filter === "pending"
-                  ? "bg-accent text-background"
-                  : "bg-surface-2 text-text-secondary hover:text-text-primary border border-border"
-              }`}
-            >
-              Disponibles
-            </button>
-            <button
-              onClick={() => setFilter("finished")}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                filter === "finished"
-                  ? "bg-accent text-background"
-                  : "bg-surface-2 text-text-secondary hover:text-text-primary border border-border"
-              }`}
-            >
-              Finalizados
-            </button>
+            {(["pending", "finished"] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setFilter(s)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                  filter === s
+                    ? "bg-accent text-background"
+                    : "bg-surface-2 text-text-secondary hover:text-text-primary border border-border"
+                }`}
+              >
+                {s === "pending" ? "Disponibles" : "Finalizados"}
+              </button>
+            ))}
           </div>
 
-          {/* Sport filter */}
+          {/* Sport */}
           <div className="flex flex-wrap gap-1.5">
             {SPORTS.map((s) => (
               <button
                 key={s.value}
                 onClick={() => setSportFilter(s.value as Sport | "all")}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
                   sportFilter === s.value
                     ? "bg-blue-muted border border-blue/30 text-blue"
                     : "bg-surface-2 text-text-muted hover:text-text-secondary border border-border"
                 }`}
               >
-                {s.label}
+                <span>{s.icon}</span>{s.label}
               </button>
             ))}
+          </div>
+
+          {/* League — only shown when there are multiple leagues */}
+          {leagues.length > 1 && (
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                onClick={() => setLeagueFilter("all")}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                  leagueFilter === "all"
+                    ? "bg-accent/15 border border-accent/30 text-accent"
+                    : "bg-surface-2 text-text-muted hover:text-text-secondary border border-border"
+                }`}
+              >
+                Todas las ligas
+              </button>
+              {leagues.map((league) => (
+                <button
+                  key={league}
+                  onClick={() => setLeagueFilter(league)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                    leagueFilter === league
+                      ? "bg-accent/15 border border-accent/30 text-accent"
+                      : "bg-surface-2 text-text-muted hover:text-text-secondary border border-border"
+                  }`}
+                >
+                  {league}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Search */}
+          <div className="relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar equipo o competición…"
+              className="w-full bg-surface-2 border border-border rounded-xl pl-8 pr-8 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/50 transition"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition">
+                <X size={13} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -128,15 +189,19 @@ export default function EventsPage() {
         {/* Events list */}
         {loading || !profile ? (
           <PageLoader />
-        ) : events.length === 0 ? (
+        ) : visibleEvents.length === 0 ? (
           <EmptyState
             icon="📅"
-            title="No hay eventos disponibles"
-            description="No se encontraron eventos con los filtros seleccionados."
+            title="No hay eventos"
+            description={
+              search
+                ? `No se encontraron eventos para "${search}".`
+                : "No se encontraron eventos con los filtros seleccionados."
+            }
           />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            {events.map((event) => (
+            {visibleEvents.map((event) => (
               <EventCard
                 key={event.id}
                 event={event}
@@ -148,7 +213,6 @@ export default function EventsPage() {
         )}
       </div>
 
-      {/* Bet modal */}
       {selectedBet && profile && (
         <BetModal
           event={selectedBet.event}
