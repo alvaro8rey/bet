@@ -12,6 +12,13 @@ export function formatPoints(points: number): string {
   return new Intl.NumberFormat("es-ES").format(Math.floor(points));
 }
 
+export function formatPointsCompact(points: number): string {
+  const n = Math.floor(points);
+  if (Math.abs(n) >= 1_000_000) return (n / 1_000_000).toLocaleString("es-ES", { maximumFractionDigits: 1 }) + "M";
+  if (Math.abs(n) >= 10_000)    return (n / 1_000).toLocaleString("es-ES", { maximumFractionDigits: 1 }) + "K";
+  return new Intl.NumberFormat("es-ES").format(n);
+}
+
 export function formatOdds(odds: number): string {
   return odds.toFixed(2);
 }

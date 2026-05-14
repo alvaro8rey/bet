@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/Card";
-import { formatPoints, formatDate, getWinRateColor } from "@/utils";
+import { formatPoints, formatPointsCompact, formatDate, getWinRateColor } from "@/utils";
 import { LogoutButton } from "@/components/profile/LogoutButton";
 import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import Link from "next/link";
@@ -84,20 +84,28 @@ export default async function ProfilePage() {
         {/* P&L */}
         <Card className="p-5">
           <h2 className="font-display font-bold text-lg text-text-primary mb-4">Balance de puntos</h2>
-          <div className="grid grid-cols-3 gap-2 sm:gap-4">
-            <div className="text-center">
-              <p className="text-text-muted text-xs mb-1">Ganado</p>
-              <p className="text-win font-bold text-base sm:text-xl">+{formatPoints(totalWon)}</p>
-            </div>
-            <div className="text-center border-x border-border">
-              <p className="text-text-muted text-xs mb-1">Perdido</p>
-              <p className="text-loss font-bold text-base sm:text-xl">-{formatPoints(totalLost)}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-text-muted text-xs mb-1">Neto</p>
-              <p className={`font-bold text-base sm:text-xl ${netBalance >= 0 ? "text-win" : "text-loss"}`}>
-                {netBalance >= 0 ? "+" : ""}{formatPoints(netBalance)}
+          <div className="grid grid-cols-3 gap-1 sm:gap-4">
+            <div className="text-center min-w-0 overflow-hidden px-1">
+              <p className="text-text-muted text-xs mb-1 truncate">Ganado</p>
+              <p className="text-win font-bold text-sm sm:text-xl truncate" title={`+${formatPoints(totalWon)}`}>
+                +{formatPointsCompact(totalWon)}
               </p>
+              <p className="text-text-muted text-[10px] hidden sm:block">{formatPoints(totalWon)} pts</p>
+            </div>
+            <div className="text-center min-w-0 overflow-hidden border-x border-border px-1">
+              <p className="text-text-muted text-xs mb-1 truncate">Perdido</p>
+              <p className="text-loss font-bold text-sm sm:text-xl truncate" title={`-${formatPoints(totalLost)}`}>
+                -{formatPointsCompact(totalLost)}
+              </p>
+              <p className="text-text-muted text-[10px] hidden sm:block">{formatPoints(totalLost)} pts</p>
+            </div>
+            <div className="text-center min-w-0 overflow-hidden px-1">
+              <p className="text-text-muted text-xs mb-1 truncate">Neto</p>
+              <p className={`font-bold text-sm sm:text-xl truncate ${netBalance >= 0 ? "text-win" : "text-loss"}`}
+                 title={`${netBalance >= 0 ? "+" : ""}${formatPoints(netBalance)}`}>
+                {netBalance >= 0 ? "+" : ""}{formatPointsCompact(netBalance)}
+              </p>
+              <p className="text-text-muted text-[10px] hidden sm:block">{formatPoints(netBalance)} pts</p>
             </div>
           </div>
         </Card>
