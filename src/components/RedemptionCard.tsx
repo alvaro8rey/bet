@@ -42,7 +42,7 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
       if (error) throw error;
 
       try {
-        await supabase.functions.invoke("send-redemption-email", {
+        const { error: emailError } = await supabase.functions.invoke("send-redemption-email", {
           body: {
             email: redemption.email,
             nombre: redemption.nombre,
@@ -52,8 +52,13 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
             ...(key ? { codigo_digital: key } : {}),
           },
         });
+        if (emailError) {
+          console.error("Error sending email:", emailError);
+          toast.error("Estado actualizado pero el email no se pudo enviar");
+        }
       } catch (emailError) {
         console.error("Error sending email:", emailError);
+        toast.error("Estado actualizado pero el email no se pudo enviar");
       }
 
       toast.success(`Estado actualizado a "${statusConfig[newStatus as keyof typeof statusConfig].label}"`);
