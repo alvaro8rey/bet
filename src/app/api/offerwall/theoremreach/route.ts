@@ -16,12 +16,17 @@ function verifyHash(userId: string, reward: string, txId: string, received: stri
     console.error("THEOREM_REACH_SECRET not configured");
     return false;
   }
-  // Try all likely payload orderings
+  const apiKey = process.env.THEOREM_REACH_API_KEY ?? "";
+  // Try all likely payload orderings including api_key
   const candidates = [
     reward + txId + userId,
     userId + reward + txId,
     txId + userId + reward,
     userId + txId + reward,
+    apiKey + userId + reward + txId,
+    apiKey + reward + txId + userId,
+    userId + reward + txId + apiKey,
+    apiKey + txId + userId + reward,
   ];
   for (const payload of candidates) {
     const raw = crypto.createHmac("sha1", secret).update(payload).digest("base64");
