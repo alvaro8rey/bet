@@ -13,28 +13,28 @@ interface RedemptionEmailRequest {
 
 const statusMessages = {
   pending: {
-    subject: "Canje de premio recibido - PlayfulBet",
+    subject: "Canje de premio recibido - SharpBet",
     title: "¡Tu canje ha sido recibido!",
     message:
       "Hemos recibido tu solicitud de canje. Nos pondremos en contacto pronto para confirmarlo.",
     color: "#ffd700",
   },
   processing: {
-    subject: "Tu canje está siendo procesado - PlayfulBet",
+    subject: "Tu canje está siendo procesado - SharpBet",
     title: "🔄 Tu pedido está siendo procesado",
     message:
       "Tu canje está siendo preparado. Te enviaremos los detalles de envío pronto.",
     color: "#4488ff",
   },
   completed: {
-    subject: "¡Tu canje ha sido completado! - PlayfulBet",
+    subject: "¡Tu canje ha sido completado! - SharpBet",
     title: "✅ ¡Tu pedido está en camino!",
     message:
       "Tu canje ha sido completado y está siendo enviado. Revisa tu email para los detalles de seguimiento.",
     color: "#00e676",
   },
   cancelled: {
-    subject: "Tu canje ha sido cancelado - PlayfulBet",
+    subject: "Tu canje ha sido cancelado - SharpBet",
     title: "❌ Tu canje fue cancelado",
     message:
       "Lamentablemente tu canje ha sido cancelado. Los puntos han sido reembolsados a tu cuenta.",
@@ -63,7 +63,7 @@ const emailTemplate = (data: RedemptionEmailRequest, statusInfo: any) => `
 <body>
   <div class="container">
     <div class="header">
-      <h1>PlayfulBet</h1>
+      <h1>SharpBet</h1>
       <p>Notificación de Canje</p>
     </div>
 
@@ -92,7 +92,7 @@ const emailTemplate = (data: RedemptionEmailRequest, statusInfo: any) => `
     <p>Si tienes dudas, contáctanos respondiendo a este email.</p>
 
     <div class="footer">
-      <p>© 2024 PlayfulBet. Todos los derechos reservados.</p>
+      <p>© 2024 SharpBet. Todos los derechos reservados.</p>
       <p>Este es un email automático, no responder a esta dirección.</p>
     </div>
   </div>
@@ -147,7 +147,7 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "PlayfulBet <noreply@camposdegalicia.es>",
+        from: "SharpBet <premios@sharpbet.es>",
         to: data.email,
         subject: statusInfo.subject,
         html: emailTemplate(data, statusInfo),

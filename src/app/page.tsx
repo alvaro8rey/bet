@@ -130,7 +130,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-border py-8 px-4 text-center space-y-3">
         <p className="text-text-muted text-sm">
-          © 2025 PlayfulBet. Plataforma de predicciones con puntos virtuales.{" "}
+          © 2025 SharpBet. Plataforma de predicciones con puntos virtuales.{" "}
           <span className="text-accent font-medium">Sin dinero real.</span>
         </p>
         <div className="flex flex-wrap justify-center gap-4 text-xs text-text-muted">

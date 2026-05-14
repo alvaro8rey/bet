@@ -8,7 +8,7 @@ export default function Loading() {
           <span className="text-xl">🎯</span>
         </div>
         <Spinner size="lg" />
-        <p className="text-text-muted text-sm animate-pulse">Cargando PlayfulBet...</p>
+        <p className="text-text-muted text-sm animate-pulse">Cargando SharpBet...</p>
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { ChevronLeft, Trophy, Zap, Gift, TrendingUp, Star, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
-export const metadata = { title: "Cómo ganar puntos — PlayfulBet" };
+export const metadata = { title: "Cómo ganar puntos — SharpBet" };
 
 export default function ComoGanarPuntosPage() {
   return (
@@ -20,7 +20,7 @@ export default function ComoGanarPuntosPage() {
         <div className="text-center mb-12">
           <h1 className="font-display font-black text-4xl text-text-primary mb-3">Cómo ganar puntos</h1>
           <p className="text-text-secondary max-w-xl mx-auto">
-            En PlayfulBet puedes acumular puntos virtuales de varias formas.
+            En SharpBet puedes acumular puntos virtuales de varias formas.
             Cuantos más puntos tengas, más podrás apostar y mejores recompensas podrás canjear.
           </p>
         </div>
@@ -60,7 +60,7 @@ export default function ComoGanarPuntosPage() {
             color="blue"
             title="Promociones especiales"
             badge="Periódico"
-            description="De vez en cuando el equipo de PlayfulBet añade puntos bonus por logros especiales, eventos destacados o promociones temporales. Sigue el ranking para estar al tanto de las novedades."
+            description="De vez en cuando el equipo de SharpBet añade puntos bonus por logros especiales, eventos destacados o promociones temporales. Sigue el ranking para estar al tanto de las novedades."
           />
         </div>
 
@@ -89,8 +89,8 @@ export default function ComoGanarPuntosPage() {
         <div className="bg-pending/5 border border-pending/20 rounded-2xl p-5 mb-10">
           <p className="text-pending font-semibold text-sm mb-1">Aviso importante</p>
           <p className="text-text-secondary text-sm leading-relaxed">
-            Los puntos de PlayfulBet son <strong className="text-text-primary">exclusivamente virtuales</strong> y
-            no tienen valor monetario ni pueden convertirse en dinero real. PlayfulBet es una plataforma
+            Los puntos de SharpBet son <strong className="text-text-primary">exclusivamente virtuales</strong> y
+            no tienen valor monetario ni pueden convertirse en dinero real. SharpBet es una plataforma
             de entretenimiento, no un servicio de apuestas con dinero real.
           </p>
         </div>

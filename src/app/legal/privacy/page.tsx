@@ -1,4 +1,4 @@
-export const metadata = { title: "Política de privacidad — PlayfulBet" };
+export const metadata = { title: "Política de privacidad — SharpBet" };
 
 export default function PrivacyPage() {
   return (
@@ -8,11 +8,11 @@ export default function PrivacyPage() {
 
       <Section title="1. Responsable del tratamiento">
         <p>
-          El responsable del tratamiento de los datos personales recogidos a través de PlayfulBet es el
+          El responsable del tratamiento de los datos personales recogidos a través de SharpBet es el
           titular de la plataforma. Para ejercer tus derechos o resolver cualquier duda puedes
           contactar en{" "}
-          <a href="mailto:contacto@camposdegalicia.es" className="text-accent hover:underline">
-            contacto@camposdegalicia.es
+          <a href="mailto:info@sharpbet.es" className="text-accent hover:underline">
+            info@sharpbet.es
           </a>.
         </p>
       </Section>
@@ -78,8 +78,8 @@ export default function PrivacyPage() {
         </ul>
         <p>
           Para ejercer cualquiera de estos derechos, escríbenos a{" "}
-          <a href="mailto:contacto@camposdegalicia.es" className="text-accent hover:underline">
-            contacto@camposdegalicia.es
+          <a href="mailto:info@sharpbet.es" className="text-accent hover:underline">
+            info@sharpbet.es
           </a>{" "}
           con el asunto "Derechos RGPD". Responderemos en un plazo máximo de 30 días.
           También puedes presentar reclamación ante la Agencia Española de Protección de Datos (aepd.es).
@@ -88,7 +88,7 @@ export default function PrivacyPage() {
 
       <Section title="8. Cookies">
         <p>
-          PlayfulBet utiliza únicamente cookies técnicas estrictamente necesarias para el
+          SharpBet utiliza únicamente cookies técnicas estrictamente necesarias para el
           funcionamiento de la sesión de usuario. No utilizamos cookies de rastreo publicitario
           propias. Los proveedores terceros (Monlix) pueden utilizar cookies propias sujetas
           a sus políticas.

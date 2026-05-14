@@ -3,7 +3,7 @@ import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "PlayfulBet — Predicciones Deportivas",
+  title: "SharpBet — Predicciones Deportivas",
   description: "Realiza predicciones deportivas con puntos virtuales. Sin dinero real.",
   keywords: ["predicciones deportivas", "apuestas virtuales", "fútbol", "tenis", "baloncesto"],
 };

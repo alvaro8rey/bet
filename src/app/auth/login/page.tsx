@@ -45,7 +45,7 @@ export default function LoginPage() {
           <span className="text-2xl">🎯</span>
         </div>
         <h1 className="font-display font-black text-3xl text-text-primary mb-1">BIENVENIDO</h1>
-        <p className="text-text-secondary text-sm">Entra a tu cuenta de PlayfulBet</p>
+        <p className="text-text-secondary text-sm">Entra a tu cuenta de SharpBet</p>
       </div>
 
       <form onSubmit={handleLogin} className="space-y-4">

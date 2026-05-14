@@ -1,4 +1,4 @@
-export const metadata = { title: "Términos y condiciones — PlayfulBet" };
+export const metadata = { title: "Términos y condiciones — SharpBet" };
 
 export default function TermsPage() {
   return (
@@ -8,16 +8,16 @@ export default function TermsPage() {
 
       <Section title="1. Descripción del servicio">
         <p>
-          PlayfulBet es una plataforma de entretenimiento de predicciones deportivas que opera
+          SharpBet es una plataforma de entretenimiento de predicciones deportivas que opera
           exclusivamente con <strong>puntos virtuales</strong>. No se utiliza dinero real en ninguna
-          operación de la plataforma. PlayfulBet no es un servicio de apuestas con dinero real y no
+          operación de la plataforma. SharpBet no es un servicio de apuestas con dinero real y no
           está sujeto a la regulación de juegos de azar con dinero real.
         </p>
       </Section>
 
       <Section title="2. Aceptación de los términos">
         <p>
-          Al crear una cuenta en PlayfulBet aceptas estos Términos y condiciones en su totalidad.
+          Al crear una cuenta en SharpBet aceptas estos Términos y condiciones en su totalidad.
           Si no estás de acuerdo con alguno de los términos, debes dejar de utilizar el servicio.
         </p>
       </Section>
@@ -35,10 +35,10 @@ export default function TermsPage() {
           <li>Los puntos virtuales no tienen valor monetario y no pueden canjearse por dinero.</li>
           <li>Al registrarte recibes 1.000 puntos de bienvenida.</li>
           <li>Los puntos se pueden ganar realizando predicciones correctas, completando ofertas
-              en la sección "Ganar puntos" y mediante otras promociones que PlayfulBet pueda ofrecer.</li>
+              en la sección "Ganar puntos" y mediante otras promociones que SharpBet pueda ofrecer.</li>
           <li>Los puntos acumulados pueden canjearse por recompensas virtuales o físicas disponibles
               en el catálogo de la plataforma, sujeto a disponibilidad.</li>
-          <li>PlayfulBet se reserva el derecho de ajustar el saldo de puntos en caso de error técnico
+          <li>SharpBet se reserva el derecho de ajustar el saldo de puntos en caso de error técnico
               o uso fraudulento.</li>
         </ul>
       </Section>
@@ -65,7 +65,7 @@ export default function TermsPage() {
 
       <Section title="7. Suspensión y cancelación">
         <p>
-          PlayfulBet puede suspender o eliminar cualquier cuenta que infrinja estos términos.
+          SharpBet puede suspender o eliminar cualquier cuenta que infrinja estos términos.
           El usuario puede eliminar su cuenta en cualquier momento desde la página de perfil.
           Los puntos virtuales se eliminan junto con la cuenta y no son recuperables.
         </p>
@@ -73,7 +73,7 @@ export default function TermsPage() {
 
       <Section title="8. Limitación de responsabilidad">
         <p>
-          PlayfulBet se ofrece "tal cual", sin garantías de disponibilidad continua. No nos
+          SharpBet se ofrece "tal cual", sin garantías de disponibilidad continua. No nos
           hacemos responsables de pérdidas de puntos virtuales por causas técnicas ajenas a
           nuestra voluntad. Dado que los puntos no tienen valor monetario, no existe responsabilidad
           económica asociada al uso de la plataforma.
@@ -91,8 +91,8 @@ export default function TermsPage() {
       <Section title="10. Contacto">
         <p>
           Para cualquier consulta relacionada con estos términos puedes escribirnos a{" "}
-          <a href="mailto:contacto@camposdegalicia.es" className="text-accent hover:underline">
-            contacto@camposdegalicia.es
+          <a href="mailto:info@sharpbet.es" className="text-accent hover:underline">
+            info@sharpbet.es
           </a>.
         </p>
       </Section>

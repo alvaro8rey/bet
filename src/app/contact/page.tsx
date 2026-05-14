@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { ChevronLeft, Mail, Clock, MessageSquare } from "lucide-react";
 
-export const metadata = { title: "Contacto — PlayfulBet" };
+export const metadata = { title: "Contacto — SharpBet" };
 
 export default function ContactPage() {
   return (
@@ -30,10 +30,10 @@ export default function ContactPage() {
             <div>
               <p className="text-text-primary font-semibold mb-1">Correo electrónico</p>
               <a
-                href="mailto:contacto@camposdegalicia.es"
+                href="mailto:info@sharpbet.es"
                 className="text-accent hover:underline text-sm"
               >
-                contacto@camposdegalicia.es
+                info@sharpbet.es
               </a>
               <p className="text-text-muted text-xs mt-1">
                 Para consultas generales, problemas con tu cuenta o cualquier duda.
@@ -91,8 +91,8 @@ export default function ContactPage() {
 
 const FAQ = [
   {
-    q: "¿PlayfulBet usa dinero real?",
-    a: "No. PlayfulBet funciona exclusivamente con puntos virtuales sin valor monetario. No es necesario pagar ni depositar dinero en ningún momento.",
+    q: "¿SharpBet usa dinero real?",
+    a: "No. SharpBet funciona exclusivamente con puntos virtuales sin valor monetario. No es necesario pagar ni depositar dinero en ningún momento.",
   },
   {
     q: "¿Cómo puedo ganar más puntos?",
@@ -108,6 +108,6 @@ const FAQ = [
   },
   {
     q: "¿Cómo elimino mi cuenta?",
-    a: "Puedes solicitar la eliminación de tu cuenta escribiéndonos a contacto@camposdegalicia.es con el asunto 'Eliminar cuenta'. Borraremos todos tus datos en un plazo máximo de 30 días.",
+    a: "Puedes solicitar la eliminación de tu cuenta escribiéndonos a info@sharpbet.es con el asunto 'Eliminar cuenta'. Borraremos todos tus datos en un plazo máximo de 30 días.",
   },
 ];
