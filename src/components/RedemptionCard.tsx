@@ -17,6 +17,8 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
   const [loading, setLoading] = useState(false);
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [digitalKey, setDigitalKey] = useState("");
+  const [showCancelInput, setShowCancelInput] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
   const supabase = createClient();
 
   const isDigital = redemption.reward?.categoria === "digital";
@@ -31,15 +33,23 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
   const config = statusConfig[redemption.status as keyof typeof statusConfig];
   const Icon = config.icon;
 
-  const updateStatus = async (newStatus: string, key?: string) => {
+  const updateStatus = async (newStatus: string, key?: string, reason?: string) => {
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from("redemptions")
-        .update({ status: newStatus })
-        .eq("id", redemption.id);
-
-      if (error) throw error;
+      if (newStatus === "cancelled") {
+        const res = await fetch("/api/admin/cancel-redemption", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ redemptionId: redemption.id, reason }),
+        });
+        if (!res.ok) throw new Error("Failed to cancel");
+      } else {
+        const { error } = await supabase
+          .from("redemptions")
+          .update({ status: newStatus })
+          .eq("id", redemption.id);
+        if (error) throw error;
+      }
 
       try {
         const { error: emailError } = await supabase.functions.invoke("send-redemption-email", {
@@ -50,6 +60,7 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
             status: newStatus,
             puntos: redemption.reward?.puntos_necesarios,
             ...(key ? { codigo_digital: key } : {}),
+            ...(reason ? { motivo_cancelacion: reason } : {}),
           },
         });
         if (emailError) {
@@ -64,7 +75,9 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
       toast.success(`Estado actualizado a "${statusConfig[newStatus as keyof typeof statusConfig].label}"`);
       setIsOpen(false);
       setShowKeyInput(false);
+      setShowCancelInput(false);
       setDigitalKey("");
+      setCancelReason("");
       onStatusChange?.();
     } catch (error) {
       toast.error("Error al actualizar estado");
@@ -77,6 +90,9 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
     if (status === "completed" && isDigital) {
       setIsOpen(false);
       setShowKeyInput(true);
+    } else if (status === "cancelled") {
+      setIsOpen(false);
+      setShowCancelInput(true);
     } else {
       updateStatus(status);
     }
@@ -162,6 +178,40 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
                 className="px-4 py-2 text-sm text-text-muted hover:text-text-primary transition"
               >
                 Cancelar
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Cancel reason input */}
+        {showCancelInput && (
+          <div className="bg-loss/5 border border-loss/20 rounded-xl p-4 space-y-3">
+            <div className="flex items-center gap-2 text-loss text-sm font-semibold">
+              <AlertCircle size={15} />
+              Cancelar premio
+            </div>
+            <p className="text-text-muted text-xs">Motivo de cancelación (opcional). Si lo rellenas se incluirá en el email al usuario.</p>
+            <textarea
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="Ej: Premio agotado, datos de envío incorrectos..."
+              rows={2}
+              className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-loss/60 resize-none"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => updateStatus("cancelled", undefined, cancelReason || undefined)}
+                disabled={loading}
+                className="flex-1 bg-loss text-white font-semibold text-sm py-2 rounded-lg hover:bg-loss/90 disabled:opacity-40 transition"
+              >
+                {loading ? "Cancelando..." : "Confirmar cancelación"}
+              </button>
+              <button
+                onClick={() => { setShowCancelInput(false); setCancelReason(""); }}
+                disabled={loading}
+                className="px-4 py-2 text-sm text-text-muted hover:text-text-primary transition"
+              >
+                Volver
               </button>
             </div>
           </div>

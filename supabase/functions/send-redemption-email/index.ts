@@ -9,6 +9,7 @@ interface RedemptionEmailRequest {
   status: "pending" | "processing" | "completed" | "cancelled";
   puntos: number;
   codigo_digital?: string;
+  motivo_cancelacion?: string;
 }
 
 const statusMessages = {
@@ -36,7 +37,7 @@ const statusMessages = {
   cancelled: {
     subject: "Solicitud de premio cancelada - SharpBet",
     title: "Tu solicitud ha sido cancelada",
-    message: "Lamentablemente tu solicitud de premio ha sido cancelada. Los puntos han sido devueltos a tu cuenta.",
+    message: "Lamentablemente tu solicitud de premio ha sido cancelada. Los puntos han sido devueltos automáticamente a tu cuenta.",
     color: "#ff4444",
     emoji: "❌",
   },
@@ -100,6 +101,13 @@ const emailTemplate = (data: RedemptionEmailRequest, statusInfo: any) => `
           <div class="key-label">🔑 Tu código digital</div>
           <div class="key-value">${data.codigo_digital}</div>
           <div class="key-note">Guarda este código en un lugar seguro.</div>
+        </div>
+        ` : ""}
+
+        ${data.motivo_cancelacion ? `
+        <div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:16px;margin-bottom:20px;">
+          <div style="font-size:13px;font-weight:700;color:#e11d48;margin-bottom:6px;">Motivo de la cancelación</div>
+          <div style="font-size:14px;color:#52525b;">${data.motivo_cancelacion}</div>
         </div>
         ` : ""}
 
