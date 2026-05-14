@@ -29,8 +29,9 @@ export default async function EarnPage() {
       .limit(20),
   ]);
 
-  const appId = process.env.NEXT_PUBLIC_CPX_APP_ID;
-  const secureHash = buildSecureHash(user.id);
+  const cpxAppId = process.env.NEXT_PUBLIC_CPX_APP_ID;
+  const cpxSecureHash = buildSecureHash(user.id);
+  const theoremReachApiKey = process.env.NEXT_PUBLIC_THEOREM_REACH_API_KEY;
 
   const totalEarned = transactions
     ?.filter((t) => !t.reversed)
@@ -66,15 +67,20 @@ export default async function EarnPage() {
       </div>
 
       {/* Offerwall */}
-      {appId ? (
-        <EarnOfferwall appId={appId} userId={user.id} secureHash={secureHash} />
+      {cpxAppId || theoremReachApiKey ? (
+        <EarnOfferwall
+          cpxAppId={cpxAppId}
+          cpxUserId={user.id}
+          cpxSecureHash={cpxSecureHash}
+          theoremReachApiKey={theoremReachApiKey}
+          theoremReachUserId={user.id}
+        />
       ) : (
         <Card className="p-10 text-center">
           <Zap size={40} className="text-text-muted mx-auto mb-3 opacity-40" />
           <p className="text-text-primary font-semibold mb-1">Encuestas no configuradas</p>
           <p className="text-text-muted text-sm">
-            Añade <code className="bg-surface-2 px-1.5 py-0.5 rounded text-accent">NEXT_PUBLIC_CPX_APP_ID</code> y{" "}
-            <code className="bg-surface-2 px-1.5 py-0.5 rounded text-accent">CPX_SECURITY_HASH</code> a las variables de entorno.
+            Añade <code className="bg-surface-2 px-1.5 py-0.5 rounded text-accent">NEXT_PUBLIC_CPX_APP_ID</code> a las variables de entorno.
           </p>
         </Card>
       )}
