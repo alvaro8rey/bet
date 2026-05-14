@@ -8,7 +8,7 @@ import crypto from "crypto";
 
 function buildSecureHash(userId: string): string {
   const key = process.env.CPX_SECURITY_HASH ?? "";
-  return crypto.createHash("md5").update(userId + key).digest("hex");
+  return crypto.createHash("md5").update(userId + "-" + key).digest("hex");
 }
 
 export default async function EarnPage() {

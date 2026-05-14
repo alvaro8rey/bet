@@ -15,7 +15,7 @@ function verifyHash(transId: string, receivedHash: string): boolean {
   }
   const expected = crypto
     .createHash("md5")
-    .update(transId + key)
+    .update(transId + "-" + key)
     .digest("hex");
   return expected === receivedHash;
 }
