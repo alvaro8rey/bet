@@ -121,11 +121,11 @@ function RewardCard({ reward }: { reward: Reward }) {
   return (
     <div className="bg-surface border border-border rounded-2xl overflow-hidden flex flex-col hover:border-accent/30 transition-colors">
       {reward.imagen_url && (
-        <div className="w-full h-44 overflow-hidden bg-surface-2">
+        <div className="w-full h-44 overflow-hidden bg-white">
           <img
             src={reward.imagen_url}
             alt={reward.nombre}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain p-3"
           />
         </div>
       )}

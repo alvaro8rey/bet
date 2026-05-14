@@ -36,11 +36,11 @@ function RewardCard({
     <Card className="overflow-hidden hover:border-accent/40 transition-all flex flex-col">
       {/* Image */}
       {reward.imagen_url && (
-        <div className="relative w-full h-48 overflow-hidden bg-surface-2">
+        <div className="relative w-full h-48 overflow-hidden bg-white">
           <img
             src={reward.imagen_url}
             alt={reward.nombre}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-contain p-3 hover:scale-105 transition-transform duration-300"
           />
         </div>
       )}
