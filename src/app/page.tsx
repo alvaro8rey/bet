@@ -128,11 +128,17 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-8 px-4 text-center">
+      <footer className="border-t border-border py-8 px-4 text-center space-y-3">
         <p className="text-text-muted text-sm">
           © 2025 PlayfulBet. Plataforma de predicciones con puntos virtuales.{" "}
           <span className="text-accent font-medium">Sin dinero real.</span>
         </p>
+        <div className="flex flex-wrap justify-center gap-4 text-xs text-text-muted">
+          <Link href="/legal/terms" className="hover:text-text-primary transition">Términos y condiciones</Link>
+          <Link href="/legal/privacy" className="hover:text-text-primary transition">Política de privacidad</Link>
+          <Link href="/contact" className="hover:text-text-primary transition">Contacto</Link>
+          <Link href="/como-ganar-puntos" className="hover:text-text-primary transition">Cómo ganar puntos</Link>
+        </div>
       </footer>
     </div>
   );
