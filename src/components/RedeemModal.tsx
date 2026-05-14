@@ -88,17 +88,28 @@ export function RedeemModal({ isOpen, onClose, reward, onSuccess }: RedeemModalP
         if (updateError) throw updateError;
       }
 
+      // Send confirmation email automatically
+      supabase.functions.invoke("send-redemption-email", {
+        body: {
+          email: formData.email,
+          nombre: formData.nombre,
+          reward_nombre: reward.nombre,
+          status: "pending",
+          puntos: reward.puntos_necesarios,
+        },
+      }).catch((err) => console.error("Error sending confirmation email:", err));
+
       toast.success(
         isDigital
-          ? `¡Canje realizado! Recibirás el código en ${formData.email}`
-          : `¡Canje realizado! Te contactaremos en ${formData.email} para el envío`
+          ? `¡Premio solicitado! Recibirás el código en ${formData.email}`
+          : `¡Premio solicitado! Te contactaremos en ${formData.email} para el envío`
       );
       onSuccess();
       onClose();
       setFormData({ nombre: "", email: "", telefono: "", direccion: "", notas: "" });
     } catch (error) {
       console.error("Error redeeming reward:", error);
-      toast.error("Error al procesar el canje. Intenta de nuevo.");
+      toast.error("Error al procesar la solicitud. Intenta de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -221,7 +232,7 @@ export function RedeemModal({ isOpen, onClose, reward, onSuccess }: RedeemModalP
               disabled={loading}
               className="flex-1 px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-dim text-background font-medium transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
             >
-              {loading ? "Procesando..." : "Confirmar canje"}
+              {loading ? "Procesando..." : "Confirmar solicitud"}
             </button>
           </div>
         </form>
