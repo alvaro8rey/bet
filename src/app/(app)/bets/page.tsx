@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
-import { formatPoints, formatOdds, formatDate, getPredictionLabel, getSportIcon } from "@/utils";
+import { formatPoints, formatPointsCompact, formatOdds, formatDate, getPredictionLabel, getSportIcon } from "@/utils";
 import Link from "next/link";
 
 export default async function BetsPage() {
@@ -34,16 +34,22 @@ export default async function BetsPage() {
 
         {/* Summary stats */}
         <div className="grid grid-cols-3 gap-3">
-          <Card className="p-4 text-center">
+          <Card className="p-4 text-center min-w-0 overflow-hidden">
             <p className="text-2xl font-bold text-text-primary">{bets?.length || 0}</p>
             <p className="text-text-muted text-xs mt-1">Total</p>
           </Card>
-          <Card className="p-4 text-center">
-            <p className="text-2xl font-bold text-win">+{formatPoints(totalWon)}</p>
+          <Card className="p-4 text-center min-w-0 overflow-hidden">
+            <p className="text-xl sm:text-2xl font-bold text-win truncate" title={`+${formatPoints(totalWon)}`}>
+              +{formatPointsCompact(totalWon)}
+            </p>
+            <p className="text-text-muted text-[10px] hidden sm:block">{formatPoints(totalWon)} pts</p>
             <p className="text-text-muted text-xs mt-1">Ganado</p>
           </Card>
-          <Card className="p-4 text-center">
-            <p className="text-2xl font-bold text-loss">-{formatPoints(totalLost)}</p>
+          <Card className="p-4 text-center min-w-0 overflow-hidden">
+            <p className="text-xl sm:text-2xl font-bold text-loss truncate" title={`-${formatPoints(totalLost)}`}>
+              -{formatPointsCompact(totalLost)}
+            </p>
+            <p className="text-text-muted text-[10px] hidden sm:block">{formatPoints(totalLost)} pts</p>
             <p className="text-text-muted text-xs mt-1">Perdido</p>
           </Card>
         </div>
