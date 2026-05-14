@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { useProfile } from "@/hooks/useProfile";
 import { useActiveBet } from "@/hooks/useActiveBet";
 import type { Event, BetResult, Sport } from "@/types";
-import { Search, X } from "lucide-react";
+import { Search, X, SlidersHorizontal, ChevronDown } from "lucide-react";
 
 const SPORTS: { value: Sport | "all"; label: string; icon: string }[] = [
   { value: "all",        label: "Todos",      icon: "🏆" },
@@ -28,6 +28,7 @@ export default function EventsPage() {
   const [sportFilter, setSportFilter] = useState<Sport | "all">("all");
   const [leagueFilter, setLeagueFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [selectedBet, setSelectedBet] = useState<{ event: Event; prediction: BetResult } | null>(null);
   const { profile, refetch: refetchProfile } = useProfile();
   const { activeBet, refetch: refetchActiveBet } = useActiveBet();
@@ -94,70 +95,95 @@ export default function EventsPage() {
         {/* ── Filters ── */}
         <div className="flex flex-col gap-3">
 
-          {/* Status */}
+          {/* Row: status tabs + filter toggle + search */}
           <div className="flex gap-2">
-            {(["pending", "finished"] as const).map((s) => (
-              <button
-                key={s}
-                onClick={() => setFilter(s)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                  filter === s
-                    ? "bg-accent text-background"
-                    : "bg-surface-2 text-text-secondary hover:text-text-primary border border-border"
-                }`}
-              >
-                {s === "pending" ? "Disponibles" : "Finalizados"}
-              </button>
-            ))}
-          </div>
-
-          {/* Sport */}
-          <div className="flex flex-wrap gap-1.5">
-            {SPORTS.map((s) => (
-              <button
-                key={s.value}
-                onClick={() => setSportFilter(s.value as Sport | "all")}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
-                  sportFilter === s.value
-                    ? "bg-blue-muted border border-blue/30 text-blue"
-                    : "bg-surface-2 text-text-muted hover:text-text-secondary border border-border"
-                }`}
-              >
-                <span>{s.icon}</span>{s.label}
-              </button>
-            ))}
-          </div>
-
-          {/* League — only shown when there are multiple leagues */}
-          {leagues.length > 1 && (
-            <div className="flex flex-wrap gap-1.5">
-              <button
-                onClick={() => setLeagueFilter("all")}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
-                  leagueFilter === "all"
-                    ? "bg-accent/15 border border-accent/30 text-accent"
-                    : "bg-surface-2 text-text-muted hover:text-text-secondary border border-border"
-                }`}
-              >
-                Todas las ligas
-              </button>
-              {leagues.map((league) => (
+            {/* Status */}
+            <div className="flex gap-2 flex-1">
+              {(["pending", "finished"] as const).map((s) => (
                 <button
-                  key={league}
-                  onClick={() => setLeagueFilter(league)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
-                    leagueFilter === league
-                      ? "bg-accent/15 border border-accent/30 text-accent"
-                      : "bg-surface-2 text-text-muted hover:text-text-secondary border border-border"
+                  key={s}
+                  onClick={() => setFilter(s)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    filter === s
+                      ? "bg-accent text-background"
+                      : "bg-surface-2 text-text-secondary hover:text-text-primary border border-border"
                   }`}
                 >
-                  {league}
+                  {s === "pending" ? "Disponibles" : "Finalizados"}
                 </button>
               ))}
             </div>
+
+            {/* Filter toggle button */}
+            <button
+              onClick={() => setFiltersOpen((o) => !o)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all ${
+                filtersOpen || sportFilter !== "all" || leagueFilter !== "all"
+                  ? "bg-accent/15 border-accent/30 text-accent"
+                  : "bg-surface-2 border-border text-text-muted hover:text-text-primary"
+              }`}
+            >
+              <SlidersHorizontal size={14} />
+              <span className="hidden sm:inline">Filtros</span>
+              {(sportFilter !== "all" || leagueFilter !== "all") && (
+                <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+              )}
+              <ChevronDown size={12} className={`transition-transform ${filtersOpen ? "rotate-180" : ""}`} />
+            </button>
+          </div>
+
+          {/* Collapsible sport + league filters */}
+          {filtersOpen && (
+            <div className="flex flex-col gap-2 p-3 bg-surface-2 border border-border rounded-xl">
+              {/* Sport */}
+              <div className="flex flex-wrap gap-1.5">
+                {SPORTS.map((s) => (
+                  <button
+                    key={s.value}
+                    onClick={() => setSportFilter(s.value as Sport | "all")}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
+                      sportFilter === s.value
+                        ? "bg-blue-muted border border-blue/30 text-blue"
+                        : "bg-surface-1 text-text-muted hover:text-text-secondary border border-border"
+                    }`}
+                  >
+                    <span>{s.icon}</span>{s.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* League */}
+              {leagues.length > 1 && (
+                <div className="flex flex-wrap gap-1.5 pt-1 border-t border-border">
+                  <button
+                    onClick={() => setLeagueFilter("all")}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                      leagueFilter === "all"
+                        ? "bg-accent/15 border border-accent/30 text-accent"
+                        : "bg-surface-1 text-text-muted hover:text-text-secondary border border-border"
+                    }`}
+                  >
+                    Todas
+                  </button>
+                  {leagues.map((league) => (
+                    <button
+                      key={league}
+                      onClick={() => setLeagueFilter(league)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                        leagueFilter === league
+                          ? "bg-accent/15 border border-accent/30 text-accent"
+                          : "bg-surface-1 text-text-muted hover:text-text-secondary border border-border"
+                      }`}
+                    >
+                      {league}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
 
-          {/* Search */}
+          {/* Search — font-size 16px prevents iOS zoom on focus */}
           <div className="relative">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
             <input
@@ -165,7 +191,8 @@ export default function EventsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar equipo o competición…"
-              className="w-full bg-surface-2 border border-border rounded-xl pl-8 pr-8 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/50 transition"
+              style={{ fontSize: "16px" }}
+              className="w-full bg-surface-2 border border-border rounded-xl pl-8 pr-8 py-2 text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/50 transition"
             />
             {search && (
               <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition">
