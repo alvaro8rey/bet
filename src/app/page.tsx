@@ -141,7 +141,7 @@ export default function HomePage() {
                 icon: <Zap size={24} className="text-accent" />,
                 title: "Regístrate y gana puntos",
                 description:
-                  "Obtén 1.000 puntos al registrarte. Consigue más completando tareas fáciles: encuestas, ofertas, vídeos…",
+                  "Al registrarte recibes 1.000 puntos de bienvenida. Además, habrá más formas de acumular puntos próximamente.",
                 color: "text-accent",
                 bg: "bg-accent-muted",
                 border: "border-accent/20",
@@ -187,51 +187,25 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto">
           <div className="bg-surface border border-border rounded-3xl p-6 sm:p-10 overflow-hidden relative">
             <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative grid md:grid-cols-2 gap-8 items-center">
-              <div>
+            <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-8">
+              <div className="flex-1">
                 <div className="inline-flex items-center gap-2 bg-accent-muted border border-accent/20 rounded-full px-3 py-1 mb-4">
                   <Zap size={12} className="text-accent" />
-                  <span className="text-accent text-xs font-semibold">Gana puntos sin apostar</span>
+                  <span className="text-accent text-xs font-semibold">Próximamente</span>
                 </div>
                 <h2 className="font-display font-black text-2xl sm:text-3xl text-text-primary mb-4">
                   Más formas de acumular puntos
                 </h2>
-                <p className="text-text-secondary text-sm sm:text-base leading-relaxed mb-6">
-                  No solo puedes ganar puntos prediciendo resultados deportivos. Nuestra sección
-                  <span className="text-text-primary font-medium"> "Ganar Puntos"</span> te permite
-                  completar tareas sencillas y acumular miles de puntos extra para canjear antes.
+                <p className="text-text-secondary text-sm sm:text-base leading-relaxed">
+                  Además de predecir resultados deportivos, estamos trabajando en nuevas formas de
+                  ganar puntos dentro de la plataforma para que puedas acumular más rápido y llegar
+                  antes a tus premios favoritos.
                 </p>
-                <ul className="space-y-2 text-sm text-text-secondary">
-                  {[
-                    "Completa encuestas rápidas",
-                    "Registrarte en ofertas y servicios",
-                    "Ver vídeos patrocinados",
-                    "Descargar apps o juegos",
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-accent-muted border border-accent/30 flex items-center justify-center flex-shrink-0">
-                        <span className="text-accent text-xs">✓</span>
-                      </span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: "Encuesta", pts: "+200 pts", color: "text-accent" },
-                  { label: "App descarga", pts: "+500 pts", color: "text-blue" },
-                  { label: "Registro", pts: "+1.000 pts", color: "text-pending" },
-                  { label: "Vídeo", pts: "+50 pts", color: "text-gold" },
-                ].map((task) => (
-                  <div
-                    key={task.label}
-                    className="bg-surface-2 border border-border rounded-2xl p-4 text-center hover:border-accent/20 transition-colors"
-                  >
-                    <p className="text-text-muted text-xs mb-1">{task.label}</p>
-                    <p className={`font-bold text-base ${task.color}`}>{task.pts}</p>
-                  </div>
-                ))}
+              <div className="w-full sm:w-48 bg-surface-2 border border-border rounded-2xl p-6 text-center flex-shrink-0">
+                <Zap size={28} className="text-accent mx-auto mb-3" />
+                <p className="text-text-primary font-semibold text-sm mb-1">Más formas de ganar</p>
+                <p className="text-text-muted text-xs">Muy pronto disponibles</p>
               </div>
             </div>
           </div>
