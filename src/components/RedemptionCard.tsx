@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Card } from "@/components/ui/Card";
 import { formatDateShort } from "@/utils";
-import { Mail, Phone, MapPin, FileText, CheckCircle, Clock, AlertCircle, ChevronDown, Key } from "lucide-react";
+import { Mail, Phone, MapPin, FileText, CheckCircle, Clock, AlertCircle, Key, XCircle, ChevronDown } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface RedemptionCardProps {
@@ -13,8 +13,8 @@ interface RedemptionCardProps {
 }
 
 export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showActions, setShowActions] = useState(false);
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [digitalKey, setDigitalKey] = useState("");
   const [showCancelInput, setShowCancelInput] = useState(false);
@@ -24,14 +24,15 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
   const isDigital = redemption.reward?.categoria === "digital";
 
   const statusConfig = {
-    pending: { label: "Pendiente", icon: Clock, bg: "bg-pending/10", text: "text-pending" },
-    processing: { label: "En proceso", icon: AlertCircle, bg: "bg-blue/10", text: "text-blue" },
-    completed: { label: "Completado", icon: CheckCircle, bg: "bg-accent/10", text: "text-accent" },
-    cancelled: { label: "Cancelado", icon: AlertCircle, bg: "bg-loss/10", text: "text-loss" },
+    pending:    { label: "Pendiente",   icon: Clock,         bg: "bg-pending/10", text: "text-pending" },
+    processing: { label: "En proceso",  icon: AlertCircle,   bg: "bg-blue/10",    text: "text-blue" },
+    completed:  { label: "Completado",  icon: CheckCircle,   bg: "bg-accent/10",  text: "text-accent" },
+    cancelled:  { label: "Cancelado",   icon: XCircle,       bg: "bg-loss/10",    text: "text-loss" },
   };
 
   const config = statusConfig[redemption.status as keyof typeof statusConfig];
   const Icon = config.icon;
+  const isFinal = redemption.status === "completed" || redemption.status === "cancelled";
 
   const updateStatus = async (newStatus: string, key?: string, reason?: string) => {
     setLoading(true);
@@ -63,35 +64,30 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
             ...(reason ? { motivo_cancelacion: reason } : {}),
           },
         });
-        if (emailError) {
-          console.error("Error sending email:", emailError);
-          toast.error("Estado actualizado pero el email no se pudo enviar");
-        }
-      } catch (emailError) {
-        console.error("Error sending email:", emailError);
+        if (emailError) toast.error("Estado actualizado pero el email no se pudo enviar");
+      } catch {
         toast.error("Estado actualizado pero el email no se pudo enviar");
       }
 
       toast.success(`Estado actualizado a "${statusConfig[newStatus as keyof typeof statusConfig].label}"`);
-      setIsOpen(false);
+      setShowActions(false);
       setShowKeyInput(false);
       setShowCancelInput(false);
       setDigitalKey("");
       setCancelReason("");
       onStatusChange?.();
-    } catch (error) {
+    } catch {
       toast.error("Error al actualizar estado");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleStatusClick = (status: string) => {
+  const handleActionClick = (status: string) => {
+    setShowActions(false);
     if (status === "completed" && isDigital) {
-      setIsOpen(false);
       setShowKeyInput(true);
     } else if (status === "cancelled") {
-      setIsOpen(false);
       setShowCancelInput(true);
     } else {
       updateStatus(status);
@@ -116,46 +112,48 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
             </p>
           </div>
 
-          {/* Status dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition ${config.bg} ${config.text}`}
-            >
-              <Icon size={14} />
-              {config.label}
-              <ChevronDown size={12} className={`transition ${isOpen ? "rotate-180" : ""}`} />
-            </button>
-
-            {isOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-surface border border-border rounded-lg shadow-lg z-10">
-                {Object.entries(statusConfig).map(([status, cfg]) => (
-                  <button
-                    key={status}
-                    onClick={() => handleStatusClick(status)}
-                    disabled={loading || status === redemption.status}
-                    className={`w-full px-4 py-2.5 text-sm font-medium text-left transition ${
-                      status === redemption.status
-                        ? `${cfg.bg} ${cfg.text} cursor-default`
-                        : "text-text-secondary hover:bg-surface-2"
-                    } disabled:opacity-50 first:rounded-t-lg last:rounded-b-lg`}
-                  >
-                    {cfg.label}
-                  </button>
-                ))}
-              </div>
-            )}
+          {/* Status badge */}
+          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium flex-shrink-0 ${config.bg} ${config.text}`}>
+            <Icon size={13} />
+            {config.label}
           </div>
         </div>
 
-        {/* Digital key input — shown when completing a digital reward */}
+        {/* Contact Info */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+          <div className="flex items-center gap-2 text-text-secondary">
+            <Mail size={15} className="flex-shrink-0 text-text-muted" />
+            <span className="truncate">{redemption.email}</span>
+          </div>
+          {redemption.telefono && (
+            <div className="flex items-center gap-2 text-text-secondary">
+              <Phone size={15} className="flex-shrink-0 text-text-muted" />
+              <span>{redemption.telefono}</span>
+            </div>
+          )}
+          {redemption.direccion && (
+            <div className="flex items-start gap-2 text-text-secondary sm:col-span-2">
+              <MapPin size={15} className="flex-shrink-0 text-text-muted mt-0.5" />
+              <span>{redemption.direccion}</span>
+            </div>
+          )}
+        </div>
+
+        {redemption.notas && (
+          <div className="flex items-start gap-2 bg-surface-2 rounded-lg p-3 text-sm">
+            <FileText size={15} className="flex-shrink-0 text-text-muted mt-0.5" />
+            <span className="text-text-secondary">{redemption.notas}</span>
+          </div>
+        )}
+
+        {/* Digital key input */}
         {showKeyInput && (
           <div className="bg-accent/5 border border-accent/20 rounded-xl p-4 space-y-3">
             <div className="flex items-center gap-2 text-accent text-sm font-semibold">
               <Key size={15} />
-              Introduce la clave o código digital
+              Introduce el código digital
             </div>
-            <p className="text-text-muted text-xs">Se incluirá en el email enviado al usuario junto con la confirmación del canje.</p>
+            <p className="text-text-muted text-xs">Se enviará en el email de confirmación al usuario.</p>
             <input
               type="text"
               value={digitalKey}
@@ -172,11 +170,8 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
               >
                 {loading ? "Enviando..." : "Confirmar y enviar email"}
               </button>
-              <button
-                onClick={() => { setShowKeyInput(false); setDigitalKey(""); }}
-                disabled={loading}
-                className="px-4 py-2 text-sm text-text-muted hover:text-text-primary transition"
-              >
+              <button onClick={() => { setShowKeyInput(false); setDigitalKey(""); }} disabled={loading}
+                className="px-4 py-2 text-sm text-text-muted hover:text-text-primary transition">
                 Cancelar
               </button>
             </div>
@@ -187,10 +182,10 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
         {showCancelInput && (
           <div className="bg-loss/5 border border-loss/20 rounded-xl p-4 space-y-3">
             <div className="flex items-center gap-2 text-loss text-sm font-semibold">
-              <AlertCircle size={15} />
+              <XCircle size={15} />
               Cancelar premio
             </div>
-            <p className="text-text-muted text-xs">Motivo de cancelación (opcional). Si lo rellenas se incluirá en el email al usuario.</p>
+            <p className="text-text-muted text-xs">Motivo de cancelación (opcional) — si lo rellenas se incluirá en el email al usuario. Los puntos se devolverán automáticamente.</p>
             <textarea
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
@@ -206,51 +201,50 @@ export function RedemptionCard({ redemption, onStatusChange }: RedemptionCardPro
               >
                 {loading ? "Cancelando..." : "Confirmar cancelación"}
               </button>
-              <button
-                onClick={() => { setShowCancelInput(false); setCancelReason(""); }}
-                disabled={loading}
-                className="px-4 py-2 text-sm text-text-muted hover:text-text-primary transition"
-              >
+              <button onClick={() => { setShowCancelInput(false); setCancelReason(""); }} disabled={loading}
+                className="px-4 py-2 text-sm text-text-muted hover:text-text-primary transition">
                 Volver
               </button>
             </div>
           </div>
         )}
 
-        {/* Contact Info */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-          <div className="flex items-center gap-2 text-text-secondary">
-            <Mail size={16} className="flex-shrink-0 text-text-muted" />
-            <span>{redemption.email}</span>
-          </div>
-
-          {redemption.telefono && (
-            <div className="flex items-center gap-2 text-text-secondary">
-              <Phone size={16} className="flex-shrink-0 text-text-muted" />
-              <span>{redemption.telefono}</span>
-            </div>
-          )}
-
-          {redemption.direccion && (
-            <div className="flex items-start gap-2 text-text-secondary sm:col-span-2">
-              <MapPin size={16} className="flex-shrink-0 text-text-muted mt-0.5" />
-              <span>{redemption.direccion}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Notes */}
-        {redemption.notas && (
-          <div className="flex items-start gap-2 bg-surface-2 rounded-lg p-3 text-sm">
-            <FileText size={16} className="flex-shrink-0 text-text-muted mt-0.5" />
-            <span className="text-text-secondary">{redemption.notas}</span>
-          </div>
-        )}
-
-        {/* Footer */}
+        {/* Footer: date + actions */}
         <div className="flex items-center justify-between pt-3 border-t border-border text-xs text-text-muted">
-          <span>{formatDateShort(redemption.created_at)}</span>
-          <span>{redemption.reward?.puntos_necesarios.toLocaleString()} puntos</span>
+          <span>{formatDateShort(redemption.created_at)} · {redemption.reward?.puntos_necesarios.toLocaleString()} pts</span>
+
+          {!isFinal && !showKeyInput && !showCancelInput && (
+            <div className="relative">
+              <button
+                onClick={() => setShowActions(!showActions)}
+                disabled={loading}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-surface-2 border border-border text-text-secondary hover:text-text-primary text-xs font-medium transition"
+              >
+                Cambiar estado <ChevronDown size={11} className={showActions ? "rotate-180 transition" : "transition"} />
+              </button>
+
+              {showActions && (
+                <div className="absolute bottom-full right-0 mb-1 w-44 bg-surface border border-border rounded-xl shadow-xl z-50 overflow-hidden">
+                  {Object.entries(statusConfig)
+                    .filter(([s]) => s !== redemption.status)
+                    .map(([status, cfg]) => {
+                      const Ic = cfg.icon;
+                      return (
+                        <button
+                          key={status}
+                          onClick={() => handleActionClick(status)}
+                          disabled={loading}
+                          className={`w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-left hover:bg-surface-2 transition ${cfg.text}`}
+                        >
+                          <Ic size={14} />
+                          {cfg.label}
+                        </button>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </Card>
