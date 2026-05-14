@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import crypto from "crypto";
 
-// CPX Research sends a postback when a user completes a survey.
-// Verification hash: MD5(trans_id + security_hash_key)
-// Expected response on success: "1"
+// CPX Research postback docs:
+// status=1 → completed, status=2 → reversed (fraud detected)
+// hash verification: MD5(trans_id + CPX_SECURITY_HASH)
+// Must respond with "1" on success.
 
 function verifyHash(transId: string, receivedHash: string): boolean {
   const key = process.env.CPX_SECURITY_HASH;
@@ -33,9 +34,9 @@ export async function GET(request: NextRequest) {
     return new NextResponse("missing_params", { status: 400 });
   }
 
-  // Only credit completed surveys (status=1)
-  if (status !== "1") {
-    return new NextResponse("1", { status: 200 });
+  if (!verifyHash(transId, hash)) {
+    console.warn("CPX postback invalid hash", { transId, hash });
+    return new NextResponse("invalid_hash", { status: 403 });
   }
 
   const amount = parseInt(amountStr, 10);
@@ -43,12 +44,44 @@ export async function GET(request: NextRequest) {
     return new NextResponse("invalid_amount", { status: 400 });
   }
 
-  if (!verifyHash(transId, hash)) {
-    console.warn("CPX postback invalid hash", { transId, hash });
-    return new NextResponse("invalid_hash", { status: 403 });
+  const supabase = await createAdminClient();
+
+  // status=2 → fraud reversal: deduct points if the transaction was previously credited
+  if (status === "2") {
+    const { data: existing } = await supabase
+      .from("offerwall_transactions")
+      .select("id, reward_points")
+      .eq("transaction_id", transId)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase
+        .from("offerwall_transactions")
+        .update({ reversed: true })
+        .eq("transaction_id", transId);
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("points")
+        .eq("user_id", userId)
+        .single();
+
+      if (profile) {
+        await supabase
+          .from("profiles")
+          .update({ points: Math.max(0, profile.points - existing.reward_points) })
+          .eq("user_id", userId);
+
+        console.log(`⚠️ CPX reversal: user ${userId} -${existing.reward_points} pts (tx: ${transId})`);
+      }
+    }
+    return new NextResponse("1", { status: 200 });
   }
 
-  const supabase = await createAdminClient();
+  // status=1 → completed survey
+  if (status !== "1") {
+    return new NextResponse("1", { status: 200 });
+  }
 
   // Idempotency: skip already-processed transactions
   const { data: existing } = await supabase
@@ -68,6 +101,7 @@ export async function GET(request: NextRequest) {
       transaction_id: transId,
       reward_points: amount,
       provider: "cpx",
+      reversed: false,
     });
 
   if (txError) {
