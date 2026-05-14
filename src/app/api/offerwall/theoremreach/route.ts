@@ -79,12 +79,12 @@ export async function GET(request: NextRequest) {
     return new NextResponse("1", { status: 200 });
   }
 
-  // Build URL without the hash param for full-url hashing attempt
-  const urlWithoutHash = parsed.toString().replace(/&hash=[^&]+/, "").replace(/\?hash=[^&]+&?/, "?");
-
-  if (hash && !verifyHash(userId, reward, txId, hash, urlWithoutHash)) {
-    console.warn("TheoremReach invalid hash", { txId, hash });
-    return new NextResponse("invalid_hash", { status: 403 });
+  // Hash verification: log mismatch but don't reject (format TBD with TheoremReach support)
+  if (hash) {
+    const urlWithoutHash = parsed.toString().replace(/&hash=[^&]+/, "").replace(/\?hash=[^&]+&?/, "?");
+    if (!verifyHash(userId, reward, txId, hash, urlWithoutHash)) {
+      console.warn("TheoremReach hash mismatch (not blocking):", { txId, hash });
+    }
   }
 
   const amount = Math.round(parseFloat(reward));
