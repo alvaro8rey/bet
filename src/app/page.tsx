@@ -109,7 +109,7 @@ export default function HomePage() {
 
           {/* CTA inside prizes section */}
           <div className="text-center">
-            <Link href="/auth/register">
+            <Link href="/premios">
               <button className="inline-flex items-center gap-2 text-accent font-semibold text-sm hover:gap-3 transition-all">
                 Ver todos los premios disponibles
                 <ChevronRight size={16} />
