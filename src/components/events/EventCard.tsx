@@ -133,20 +133,26 @@ export function EventCard({ event, onBet, hasActiveBet, compact }: EventCardProp
         {/* Finished odds (read-only) */}
         {!compact && isFinished && (
           <div className={`grid gap-2 ${event.draw_odds ? "grid-cols-3" : "grid-cols-2"}`}>
-            <div className="bg-surface-2 rounded-xl p-2 text-center border border-border">
-              <p className="text-text-muted text-xs">Local</p>
-              <p className="text-text-primary font-bold">{formatOdds(event.home_odds)}</p>
-            </div>
-            {event.draw_odds && (
-              <div className="bg-surface-2 rounded-xl p-2 text-center border border-border">
-                <p className="text-text-muted text-xs">Empate</p>
-                <p className="text-text-primary font-bold">{formatOdds(event.draw_odds)}</p>
-              </div>
-            )}
-            <div className="bg-surface-2 rounded-xl p-2 text-center border border-border">
-              <p className="text-text-muted text-xs">Visitante</p>
-              <p className="text-text-primary font-bold">{formatOdds(event.away_odds)}</p>
-            </div>
+            {(["home", "draw", "away"] as const)
+              .filter((outcome) => outcome !== "draw" || event.draw_odds)
+              .map((outcome) => {
+                const won = event.result === outcome;
+                const label = outcome === "home" ? "Local" : outcome === "draw" ? "Empate" : "Visitante";
+                const odds = outcome === "home" ? event.home_odds : outcome === "draw" ? event.draw_odds! : event.away_odds;
+                return (
+                  <div
+                    key={outcome}
+                    className={`rounded-xl p-2 text-center border transition-all ${
+                      won
+                        ? "bg-accent/10 border-accent/40"
+                        : "bg-surface-2 border-border opacity-40"
+                    }`}
+                  >
+                    <p className={`text-xs ${won ? "text-accent" : "text-text-muted"}`}>{label}</p>
+                    <p className={`font-bold ${won ? "text-accent" : "text-text-muted"}`}>{formatOdds(odds)}</p>
+                  </div>
+                );
+              })}
           </div>
         )}
 
