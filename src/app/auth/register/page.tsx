@@ -111,6 +111,7 @@ export default function RegisterPage() {
       </div>
 
       <GoogleButton />
+      <div className="h-2" />
       <AppleButton />
 
       <div className="flex items-center gap-3 my-2">
