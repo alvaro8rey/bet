@@ -55,38 +55,41 @@ function clean(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-// Word-level matching to avoid "spurs" in "sanantoniospurs" matching Tottenham
-const STOPWORDS = new Set(["de", "la", "el", "al", "del", "los", "las", "fc", "cf"]);
+const STOPWORDS  = new Set(["de", "la", "el", "al", "del", "los", "las"]);
+const QUALIFIERS = new Set(["fc", "cf", "sc", "fk", "afc", "bk", "ik", "sk"]);
 
-function wordMatches(haystack: string, needle: string): boolean {
-  const words = needle.toLowerCase().split(/\s+/).filter((w) => w.length >= 2 && !STOPWORDS.has(w));
-  if (words.length === 0) return false;
-  const h = haystack.toLowerCase();
-  // All significant words of needle must appear in haystack
-  return words.every((w) => h.includes(w));
+function tokenize(s: string): string[] {
+  return s.toLowerCase().split(/\s+/).filter((w) => w.length >= 2 && !STOPWORDS.has(w));
+}
+
+/**
+ * Bidirectional word match:
+ *   1. Every word in `query` must appear (accent-stripped) inside `apiName`.
+ *   2. Every significant (non-qualifier) word of `apiName` must appear inside `query`.
+ * This prevents "Paris FC" from matching "Paris Saint-Germain" and
+ * "Sporting CP" from matching "Sporting Gijón".
+ */
+function wordMatches(apiName: string, query: string): boolean {
+  const qWords = tokenize(query);
+  const nWords = tokenize(apiName);
+  if (qWords.length === 0) return false;
+
+  const cn = clean(apiName);
+  const cq = clean(query);
+
+  if (!qWords.every((w) => cn.includes(clean(w)))) return false;
+
+  const nSig = nWords.filter((w) => !QUALIFIERS.has(w));
+  return nSig.length === 0 || nSig.every((w) => cq.includes(clean(w)));
 }
 
 function matches(name: string, short: string, abbr: string, query: string): boolean {
   const q = clean(query);
-  if (q.length < 3) return false;
+  if (q.length < 2) return false;
 
-  const n = clean(name);
-  const s = clean(short);
-  const a = clean(abbr);
+  if (clean(name) === q || clean(short) === q || clean(abbr) === q) return true;
 
-  // Exact match (most reliable)
-  if (n === q || s === q || a === q) return true;
-
-  // Full name contains full query or vice-versa (character level, both >= 5 chars to avoid short false positives)
-  if (n.length >= 5 && q.length >= 5 && (n === q || (n.length > q.length ? n.includes(q) : q.includes(n)))) return true;
-
-  // Word-level: every word in the query appears in the full team name
-  if (wordMatches(name, query)) return true;
-  // Word-level: every word in the team name appears in the query
-  if (wordMatches(query, name)) return true;
-  if (name !== short && wordMatches(query, short)) return true;
-
-  return false;
+  return wordMatches(name, query) || wordMatches(short, query);
 }
 
 // ── football-data.org lookup ─────────────────────────────────────────────────
