@@ -48,7 +48,7 @@ export default function EventsPage() {
       query = query.eq("sport", sportFilter);
     }
 
-    const { data } = await query;
+    const { data } = await query.limit(500);
     setEvents(data || []);
     setLeagueFilter("all");
     setLoading(false);

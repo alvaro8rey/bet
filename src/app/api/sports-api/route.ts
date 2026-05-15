@@ -29,7 +29,10 @@ function avgOdds(bookmakers: any[], teamName: string): number | null {
 }
 
 async function oddsApiFetch(path: string) {
-  const res = await fetch(`${BASE}${path}`, { next: { revalidate: 300 } });
+  const res = await fetch(`${BASE}${path}`, {
+    next: { revalidate: 300 },
+    signal: AbortSignal.timeout(10_000),
+  });
   if (!res.ok) throw new Error(`Odds API error ${res.status}`);
   return res.json();
 }
@@ -58,6 +61,9 @@ export async function GET(req: NextRequest) {
     }
 
     if (action === "odds" && sport) {
+      if (!/^[a-z0-9_-]+$/i.test(sport)) {
+        return NextResponse.json({ error: "Invalid sport" }, { status: 400 });
+      }
       const data = await oddsApiFetch(
         `/sports/${sport}/odds?apiKey=${API_KEY}&regions=eu&markets=h2h&oddsFormat=decimal&dateFormat=iso`
       );
@@ -83,6 +89,9 @@ export async function GET(req: NextRequest) {
     }
 
     if (action === "scores" && sport) {
+      if (!/^[a-z0-9_-]+$/i.test(sport)) {
+        return NextResponse.json({ error: "Invalid sport" }, { status: 400 });
+      }
       const data = await oddsApiFetch(
         `/sports/${sport}/scores?apiKey=${API_KEY}&daysFrom=3&dateFormat=iso`
       );

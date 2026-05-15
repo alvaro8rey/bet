@@ -39,24 +39,24 @@ export default function AdminRedemptionsPage() {
       const { data } = await supabase
         .from("redemptions")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(200);
 
       if (data) {
-        // Fetch rewards y profiles por separado
-        const enrichedData = await Promise.all(
-          (data as any[]).map(async (redemption) => {
-            const [{ data: reward }, { data: profile }] = await Promise.all([
-              supabase.from("rewards").select("nombre, puntos_necesarios, categoria").eq("id", redemption.reward_id).single(),
-              supabase.from("profiles").select("username").eq("user_id", redemption.user_id).single(),
-            ]);
-            return {
-              ...redemption,
-              reward,
-              profile,
-            };
-          })
+        const rewardIds = [...new Set((data as any[]).map((r) => r.reward_id))];
+        const userIds   = [...new Set((data as any[]).map((r) => r.user_id))];
+
+        const [{ data: rewards }, { data: profiles }] = await Promise.all([
+          supabase.from("rewards").select("id, nombre, puntos_necesarios, categoria").in("id", rewardIds),
+          supabase.from("profiles").select("user_id, username").in("user_id", userIds),
+        ]);
+
+        const rewardMap  = Object.fromEntries((rewards  ?? []).map((r) => [r.id,      r]));
+        const profileMap = Object.fromEntries((profiles ?? []).map((p) => [p.user_id, p]));
+
+        setRedemptions(
+          (data as any[]).map((r) => ({ ...r, reward: rewardMap[r.reward_id], profile: profileMap[r.user_id] })) as Redemption[]
         );
-        setRedemptions(enrichedData as Redemption[]);
       }
     } catch (error) {
       console.error("Error fetching redemptions:", error);

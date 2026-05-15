@@ -14,16 +14,14 @@ export default async function AdminPage() {
   const { data: profile } = await supabase.from("profiles").select("is_admin").eq("user_id", user.id).single();
   if (!profile?.is_admin) redirect("/dashboard");
 
-  const [{ data: events }, { data: bets }, { count: usersCount }, { data: redemptions }] = await Promise.all([
+  const [{ data: events }, { count: pendingBets }, { count: usersCount }, { count: pendingRedemptions }] = await Promise.all([
     supabase.from("events").select("*").order("event_date", { ascending: false }).limit(10),
-    supabase.from("bets").select("id, status").neq("status", "cancelled"),
+    supabase.from("bets").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("profiles").select("id", { count: "exact", head: true }),
-    supabase.from("redemptions").select("id, status").order("created_at", { ascending: false }).limit(100),
+    supabase.from("redemptions").select("id", { count: "exact", head: true }).eq("status", "pending"),
   ]);
 
   const pendingEvents = events?.filter((e) => e.status === "pending").length || 0;
-  const pendingBets = bets?.filter((b) => b.status === "pending").length || 0;
-  const pendingRedemptions = redemptions?.filter((r) => r.status === "pending").length || 0;
 
   return (
       <div className="space-y-6 animate-fade-in">

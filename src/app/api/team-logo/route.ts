@@ -5,13 +5,14 @@ const FOOTBALL_DATA_KEY = process.env.FOOTBALL_DATA_API_KEY ?? "";
 const FD_OPTS = {
   headers: { "X-Auth-Token": FOOTBALL_DATA_KEY },
   next: { revalidate: 86400 },
+  signal: AbortSignal.timeout(8_000),
 };
 const FD_COMPETITIONS = ["PD", "PL", "BL1", "SA", "FL1", "CL", "EL", "PPL", "DED", "ELC"];
 
 interface FDTeam { name: string; shortName: string; tla: string; crest: string; }
 
 // ── ESPN (no auth needed) ────────────────────────────────────────────────────
-const ESPN_OPTS = { next: { revalidate: 86400 } };
+const ESPN_OPTS = { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8_000) };
 
 const ESPN_BY_SPORT: Record<string, { sport: string; league: string }[]> = {
   football: [
