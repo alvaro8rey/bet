@@ -7,6 +7,7 @@ interface Offerwall {
   id: string;
   label: string;
   url: string;
+  mobileOnly?: boolean;
 }
 
 interface EarnOfferwallProps {
@@ -66,6 +67,7 @@ export function EarnOfferwall({
       id: "adgem",
       label: "AdGem",
       url: `https://adunits.adgem.com/wall?appid=${adgemAppId}&playerid=${adgemUserId.replace(/-/g, "")}`,
+      mobileOnly: true,
     });
   }
 
@@ -82,7 +84,7 @@ export function EarnOfferwall({
             <button
               key={wall.id}
               onClick={() => setActiveTab(i)}
-              className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all flex-shrink-0 ${
+              className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all flex-shrink-0 ${wall.mobileOnly ? "lg:hidden" : ""} ${
                 activeTab === i
                   ? "bg-accent text-background"
                   : "bg-surface-2 text-text-secondary hover:text-text-primary border border-border"
@@ -96,7 +98,7 @@ export function EarnOfferwall({
 
       {/* Iframe */}
       <div
-        className="relative w-full rounded-2xl overflow-hidden border border-border bg-surface"
+        className={`relative w-full rounded-2xl overflow-hidden border border-border bg-surface ${current.mobileOnly ? "lg:hidden" : ""}`}
       >
         {!loaded[activeTab] && (
           <div className="absolute inset-0 flex items-center justify-center bg-surface z-10">
