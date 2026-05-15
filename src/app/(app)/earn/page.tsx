@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/Card";
-import { formatPoints, formatDate } from "@/utils";
+import { formatPointsCompact, formatDate } from "@/utils";
 import { Zap, CheckCircle, XCircle } from "lucide-react";
 import { EarnOfferwall } from "@/components/earn/EarnOfferwall";
 import crypto from "crypto";
@@ -54,7 +54,7 @@ export default async function EarnPage() {
           </div>
           <div>
             <p className="text-text-muted text-xs">Balance actual</p>
-            <p className="text-accent font-bold text-xl">{formatPoints(profile?.points || 0)} pts</p>
+            <p className="text-accent font-bold text-xl">{formatPointsCompact(profile?.points || 0)} pts</p>
           </div>
         </Card>
         <Card className="p-4 flex items-center gap-3">
@@ -63,7 +63,7 @@ export default async function EarnPage() {
           </div>
           <div>
             <p className="text-text-muted text-xs">Ganado con encuestas</p>
-            <p className="text-win font-bold text-xl">+{formatPoints(totalEarned)} pts</p>
+            <p className="text-win font-bold text-xl">+{formatPointsCompact(totalEarned)} pts</p>
           </div>
         </Card>
       </div>

@@ -77,12 +77,12 @@ export function EarnOfferwall({
     <div className="space-y-2">
       {/* Tabs */}
       {walls.length > 1 && (
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
           {walls.map((wall, i) => (
             <button
               key={wall.id}
               onClick={() => setActiveTab(i)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+              className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all flex-shrink-0 ${
                 activeTab === i
                   ? "bg-accent text-background"
                   : "bg-surface-2 text-text-secondary hover:text-text-primary border border-border"
