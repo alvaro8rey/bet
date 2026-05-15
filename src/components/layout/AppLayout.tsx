@@ -52,15 +52,6 @@ export function AppLayout({ children }: AppLayoutProps) {
         </aside>
       </div>
 
-      {/* Mobile sticky bottom ad — above BottomNav */}
-      <div className="lg:hidden fixed bottom-16 left-0 right-0 z-40 flex justify-center bg-background/80 backdrop-blur border-t border-border">
-        <AdBanner
-          slot={AD_SLOT_MOBILE}
-          format="horizontal"
-          className="w-full max-w-sm h-[50px]"
-        />
-      </div>
-
       <BottomNav />
     </div>
   );
