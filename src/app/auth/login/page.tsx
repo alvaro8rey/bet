@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/Input";
 import toast from "react-hot-toast";
 import { Mail, Lock } from "lucide-react";
 import { GoogleButton } from "@/components/auth/GoogleButton";
+import { AppleButton } from "@/components/auth/AppleButton";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -50,6 +51,7 @@ export default function LoginPage() {
       </div>
 
       <GoogleButton />
+      <AppleButton />
 
       <div className="flex items-center gap-3 my-2">
         <div className="flex-1 h-px bg-border" />
