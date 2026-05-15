@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/Card";
-import { formatPointsCompact, formatDate } from "@/utils";
+import { formatPoints, formatPointsCompact, formatDate } from "@/utils";
 import { Zap, CheckCircle, XCircle } from "lucide-react";
 import { EarnOfferwall } from "@/components/earn/EarnOfferwall";
 import crypto from "crypto";
