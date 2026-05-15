@@ -20,7 +20,7 @@ export function BottomNav() {
   const { activeBet } = useActiveBet();
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl border-t border-border">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface border-t border-border">
       <div className="flex items-stretch h-16">
         {navItems.map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + "/");
