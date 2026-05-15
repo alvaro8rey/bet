@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { X, Package, Zap } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -29,7 +28,6 @@ export function RedeemModal({ isOpen, onClose, reward, onSuccess }: RedeemModalP
   });
 
   const isDigital = reward.categoria === "digital";
-  const supabase = createClient();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -38,67 +36,34 @@ export function RedeemModal({ isOpen, onClose, reward, onSuccess }: RedeemModalP
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.nombre || !formData.email) {
+      toast.error("Por favor completa los campos requeridos");
+      return;
+    }
+    if (!isDigital && !formData.direccion) {
+      toast.error("La dirección de envío es obligatoria para premios físicos");
+      return;
+    }
+
     setLoading(true);
-
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Debes estar logueado para canjear premios");
-        return;
-      }
-
-      if (!formData.nombre || !formData.email) {
-        toast.error("Por favor completa los campos requeridos");
-        setLoading(false);
-        return;
-      }
-
-      if (!isDigital && !formData.direccion) {
-        toast.error("La dirección de envío es obligatoria para premios físicos");
-        setLoading(false);
-        return;
-      }
-
-      const { error: redemptionError } = await supabase
-        .from("redemptions")
-        .insert({
-          user_id: user.id,
+      const res = await fetch("/api/redemptions/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           reward_id: reward.id,
           nombre: formData.nombre,
           email: formData.email,
           telefono: formData.telefono || null,
           direccion: formData.direccion || null,
           notas: formData.notas || null,
-          status: "pending",
-        });
-
-      if (redemptionError) throw redemptionError;
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("points")
-        .eq("user_id", user.id)
-        .single();
-
-      if (profile) {
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({ points: Math.max(0, profile.points - reward.puntos_necesarios) })
-          .eq("user_id", user.id);
-        if (updateError) throw updateError;
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error ?? "Error al procesar la solicitud");
+        return;
       }
-
-      // Send confirmation email automatically
-      supabase.functions.invoke("send-redemption-email", {
-        body: {
-          email: formData.email,
-          nombre: formData.nombre,
-          reward_nombre: reward.nombre,
-          status: "pending",
-          puntos: reward.puntos_necesarios,
-        },
-      }).catch((err) => console.error("Error sending confirmation email:", err));
-
       toast.success(
         isDigital
           ? `¡Premio solicitado! Recibirás el código en ${formData.email}`
@@ -107,8 +72,7 @@ export function RedeemModal({ isOpen, onClose, reward, onSuccess }: RedeemModalP
       onSuccess();
       onClose();
       setFormData({ nombre: "", email: "", telefono: "", direccion: "", notas: "" });
-    } catch (error) {
-      console.error("Error redeeming reward:", error);
+    } catch {
       toast.error("Error al procesar la solicitud. Intenta de nuevo.");
     } finally {
       setLoading(false);
