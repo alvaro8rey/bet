@@ -44,6 +44,7 @@ export default function ImportEventsPage() {
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [importingId, setImportingId] = useState<string | null>(null);
+  const [refreshingLogos, setRefreshingLogos] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -97,6 +98,34 @@ export default function ImportEventsPage() {
     }
   };
 
+  const refreshAllLogos = async () => {
+    setRefreshingLogos(true);
+    try {
+      const { data: allEvents, error } = await supabase
+        .from("events")
+        .select("id, home_team, away_team, sport");
+      if (error || !allEvents) throw new Error("No se pudieron cargar los eventos");
+
+      let updated = 0;
+      for (const ev of allEvents) {
+        const [homeLogo, awayLogo] = await Promise.all([
+          fetchTeamLogo(ev.home_team, ev.sport),
+          fetchTeamLogo(ev.away_team, ev.sport),
+        ]);
+        await supabase
+          .from("events")
+          .update({ home_team_logo: homeLogo, away_team_logo: awayLogo })
+          .eq("id", ev.id);
+        updated++;
+      }
+      toast.success(`✓ ${updated} eventos actualizados`);
+    } catch {
+      toast.error("Error al refrescar logos");
+    } finally {
+      setRefreshingLogos(false);
+    }
+  };
+
   const importEvent = async (event: ApiEvent) => {
     setImportingId(event.api_id);
     try {
@@ -144,14 +173,24 @@ export default function ImportEventsPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         <Link href="/admin">
           <Button variant="ghost" size="sm"><ArrowLeft size={16} /> Volver</Button>
         </Link>
-        <div>
+        <div className="flex-1">
           <h1 className="font-display font-black text-3xl text-text-primary">Importar Partidos</h1>
           <p className="text-text-muted text-sm">Selecciona partidos de la API y publícalos con cuotas reales</p>
         </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={refreshAllLogos}
+          loading={refreshingLogos}
+          disabled={refreshingLogos}
+        >
+          <RefreshCw size={14} />
+          Refrescar logos
+        </Button>
       </div>
 
       {/* Sport selector */}
