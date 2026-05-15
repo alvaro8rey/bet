@@ -97,7 +97,6 @@ export function EarnOfferwall({
       {/* Iframe */}
       <div
         className="relative w-full rounded-2xl overflow-hidden border border-border bg-surface"
-        style={{ minHeight: 600 }}
       >
         {!loaded[activeTab] && (
           <div className="absolute inset-0 flex items-center justify-center bg-surface z-10">
@@ -110,8 +109,7 @@ export function EarnOfferwall({
         <iframe
           key={current.id}
           src={current.url}
-          className="w-full border-0"
-          style={{ height: "calc(100vh - 300px)", minHeight: 600 }}
+          className="w-full border-0 h-[400px] sm:h-[calc(100vh-300px)] sm:min-h-[600px]"
           onLoad={() => setLoaded((prev) => ({ ...prev, [activeTab]: true }))}
           title={current.label}
         />
