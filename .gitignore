@@ -7,3 +7,5 @@
 dist/
 build/
 tsconfig.tsbuildinfo
+gen-apple-secret.mjs
+AuthKey_*.p8
