@@ -17,6 +17,8 @@ interface EarnOfferwallProps {
   theoremReachUserId?: string;
   bitlabsAppToken?: string;
   bitlabsUserId?: string;
+  adgemAppId?: string;
+  adgemUserId?: string;
 }
 
 export function EarnOfferwall({
@@ -27,6 +29,8 @@ export function EarnOfferwall({
   theoremReachUserId,
   bitlabsAppToken,
   bitlabsUserId,
+  adgemAppId,
+  adgemUserId,
 }: EarnOfferwallProps) {
   const [activeTab, setActiveTab] = useState(0);
   const [loaded, setLoaded] = useState<Record<number, boolean>>({});
@@ -54,6 +58,14 @@ export function EarnOfferwall({
       id: "bitlabs",
       label: "BitLabs",
       url: `https://web.bitlabs.ai?uid=${bitlabsUserId}&token=${bitlabsAppToken}`,
+    });
+  }
+
+  if (adgemAppId && adgemUserId) {
+    walls.push({
+      id: "adgem",
+      label: "AdGem",
+      url: `https://wall.adgem.com/?app_id=${adgemAppId}&uid=${adgemUserId}`,
     });
   }
 
