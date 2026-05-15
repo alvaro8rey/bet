@@ -34,6 +34,7 @@ export default async function EarnPage() {
   const theoremReachApiKey = process.env.NEXT_PUBLIC_THEOREM_REACH_API_KEY;
   const bitlabsAppToken = process.env.NEXT_PUBLIC_BITLABS_APP_TOKEN;
   const adgemAppId = process.env.NEXT_PUBLIC_ADGEM_APP_ID;
+  console.log("ENV CHECK — adgemAppId:", adgemAppId, "bitlabsAppToken:", !!bitlabsAppToken, "cpxAppId:", !!cpxAppId);
 
   const totalEarned = transactions
     ?.filter((t) => !t.reversed)
