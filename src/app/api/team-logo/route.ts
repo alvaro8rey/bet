@@ -56,8 +56,10 @@ function clean(s: string): string {
 }
 
 // Word-level matching to avoid "spurs" in "sanantoniospurs" matching Tottenham
+const STOPWORDS = new Set(["de", "la", "el", "al", "del", "los", "las", "fc", "cf"]);
+
 function wordMatches(haystack: string, needle: string): boolean {
-  const words = needle.toLowerCase().split(/\s+/).filter((w) => w.length >= 3);
+  const words = needle.toLowerCase().split(/\s+/).filter((w) => w.length >= 2 && !STOPWORDS.has(w));
   if (words.length === 0) return false;
   const h = haystack.toLowerCase();
   // All significant words of needle must appear in haystack
