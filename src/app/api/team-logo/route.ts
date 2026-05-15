@@ -50,6 +50,35 @@ const ESPN_BY_SPORT: Record<string, { sport: string; league: string }[]> = {
   ],
 };
 
+// ── team name aliases ─────────────────────────────────────────────────────────
+// Maps names used by The Odds API to the names used by ESPN / football-data.org
+const TEAM_ALIASES: Record<string, string[]> = {
+  "sporting lisbon":       ["sporting cp", "sporting clube de portugal"],
+  "paris saint-germain":   ["paris sg", "psg"],
+  "paris saint germain":   ["paris sg", "psg"],
+  "atletico madrid":       ["atlético de madrid", "atletico de madrid"],
+  "atletico de madrid":    ["atlético de madrid"],
+  "celta vigo":            ["rc celta", "celta de vigo"],
+  "real betis":            ["real betis balompié"],
+  "inter milan":           ["fc internazionale milano", "internazionale"],
+  "ac milan":              ["milan"],
+  "manchester city":       ["manchester city fc"],
+  "manchester united":     ["manchester united fc"],
+  "tottenham":             ["tottenham hotspur"],
+  "wolves":                ["wolverhampton wanderers"],
+  "newcastle":             ["newcastle united"],
+  "brighton":              ["brighton & hove albion"],
+  "west ham":              ["west ham united"],
+  "leicester":             ["leicester city"],
+  "nottingham forest":     ["nottingham forest"],
+  "sheffield united":      ["sheffield utd"],
+};
+
+function resolveAliases(team: string): string[] {
+  const key = team.toLowerCase();
+  return [team, ...(TEAM_ALIASES[key] ?? [])];
+}
+
 // ── helpers ──────────────────────────────────────────────────────────────────
 function clean(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -95,13 +124,16 @@ function matches(name: string, short: string, abbr: string, query: string): bool
 // ── football-data.org lookup ─────────────────────────────────────────────────
 async function footballDataLogo(team: string): Promise<string | null> {
   if (!FOOTBALL_DATA_KEY) return null;
+  const queries = resolveAliases(team);
   for (const comp of FD_COMPETITIONS) {
     try {
       const res = await fetch(`https://api.football-data.org/v4/competitions/${comp}/teams`, FD_OPTS);
       if (!res.ok) continue;
-      const found = ((await res.json())?.teams as FDTeam[] ?? [])
-        .find((t) => matches(t.name, t.shortName, t.tla, team));
-      if (found?.crest) return found.crest;
+      const teams = (await res.json())?.teams as FDTeam[] ?? [];
+      for (const q of queries) {
+        const found = teams.find((t) => matches(t.name, t.shortName, t.tla, q));
+        if (found?.crest) return found.crest;
+      }
     } catch { /* continue */ }
   }
   return null;
@@ -132,10 +164,13 @@ async function espnLeagueLogo(sport: string, league: string, team: string): Prom
 }
 
 async function espnLogo(team: string, appSport: string): Promise<string | null> {
+  const queries = resolveAliases(team);
   const leagues = ESPN_BY_SPORT[appSport] ?? ESPN_BY_SPORT.other;
   for (const { sport, league } of leagues) {
-    const logo = await espnLeagueLogo(sport, league, team);
-    if (logo) return logo;
+    for (const q of queries) {
+      const logo = await espnLeagueLogo(sport, league, q);
+      if (logo) return logo;
+    }
   }
   return null;
 }
