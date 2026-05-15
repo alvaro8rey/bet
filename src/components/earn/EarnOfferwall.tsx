@@ -65,7 +65,7 @@ export function EarnOfferwall({
     walls.push({
       id: "adgem",
       label: "AdGem",
-      url: `https://wall.adgem.com/?app_id=${adgemAppId}&uid=${adgemUserId}`,
+      url: `https://adunits.adgem.com/v1/wall?appid=${adgemAppId}&playerid=${adgemUserId}`,
     });
   }
 
