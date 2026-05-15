@@ -103,7 +103,8 @@ export default function ImportEventsPage() {
     try {
       const { data: allEvents, error } = await supabase
         .from("events")
-        .select("id, home_team, away_team, sport");
+        .select("id, home_team, away_team, sport")
+        .in("status", ["pending", "live"]);
       if (error || !allEvents) throw new Error("No se pudieron cargar los eventos");
 
       let updated = 0;
