@@ -27,7 +27,11 @@ function verifyHash(received: string, rawUrl: string): boolean {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
 
-  const userId = searchParams.get("user_id");
+  const rawUserId = searchParams.get("user_id") ?? searchParams.get("player_id");
+  // AdGem receives playerid without hyphens — restore UUID format
+  const userId = rawUserId && rawUserId.length === 32
+    ? `${rawUserId.slice(0,8)}-${rawUserId.slice(8,12)}-${rawUserId.slice(12,16)}-${rawUserId.slice(16,20)}-${rawUserId.slice(20)}`
+    : rawUserId;
   const amountStr = searchParams.get("amount");
   const txId = searchParams.get("transaction_id") ?? searchParams.get("request_id");
   const verifier = searchParams.get("verifier");
