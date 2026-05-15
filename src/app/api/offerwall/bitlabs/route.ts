@@ -16,7 +16,6 @@ function verifyHash(received: string, rawUrl: string): boolean {
   const decoded = decodeURIComponent(rawUrl);
   const clean = decoded
     .replace(/([?&])hash=[^&]*/g, "$1")
-    .replace(/([?&])debug=[^&]*/g, "$1")
     .replace(/[?&]{2,}/g, "&")
     .replace(/[?&]$/, "")
     .replace(/\?&/, "?");
