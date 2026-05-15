@@ -247,15 +247,15 @@ export default function HomePage() {
                   Más formas de acumular puntos
                 </h2>
                 <p className="text-text-secondary text-sm sm:text-base leading-relaxed">
-                  Además de predecir resultados deportivos, estamos trabajando en nuevas formas de
-                  ganar puntos dentro de la plataforma para que puedas acumular más rápido y llegar
-                  antes a tus premios favoritos.
+                  Además de predecir resultados deportivos, hay múltiples formas de acumular puntos
+                  dentro de la plataforma para que llegues antes a tus premios favoritos.
+                  Explóralas todas desde tu perfil.
                 </p>
               </div>
               <div className="w-full sm:w-48 bg-surface-2 border border-border rounded-2xl p-6 text-center flex-shrink-0">
                 <Zap size={28} className="text-accent mx-auto mb-3" />
                 <p className="text-text-primary font-semibold text-sm mb-1">Más formas de ganar</p>
-                <p className="text-text-muted text-xs">Muy pronto disponibles</p>
+                <p className="text-accent text-xs font-medium">Ya disponibles</p>
               </div>
             </div>
           </div>
