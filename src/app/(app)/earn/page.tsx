@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { formatPoints, formatPointsCompact, formatDate } from "@/utils";
 import { Zap, CheckCircle, XCircle } from "lucide-react";
 import { EarnOfferwall } from "@/components/earn/EarnOfferwall";
+import { EarnRefresher } from "@/components/earn/EarnRefresher";
 import crypto from "crypto";
 
 function buildSecureHash(userId: string): string {
@@ -41,6 +42,7 @@ export default async function EarnPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <EarnRefresher userId={user.id} />
       <div>
         <h1 className="font-display font-black text-3xl text-text-primary mb-1">Ganar Puntos</h1>
         <p className="text-text-muted text-sm">Completa encuestas y gana puntos para canjear por premios</p>
