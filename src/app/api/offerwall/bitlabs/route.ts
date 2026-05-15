@@ -13,7 +13,8 @@ function verifyHash(received: string, rawUrl: string): boolean {
     return false;
   }
   // Strip hash and debug params using regex to preserve exact encoding (brackets, etc.)
-  const clean = rawUrl
+  const decoded = decodeURIComponent(rawUrl);
+  const clean = decoded
     .replace(/([?&])hash=[^&]*/g, "$1")
     .replace(/([?&])debug=[^&]*/g, "$1")
     .replace(/[?&]{2,}/g, "&")
