@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { formatOdds, formatPoints, calculatePotentialWin, getPredictionLabel, getSportIcon } from "@/utils";
@@ -20,7 +19,6 @@ interface BetModalProps {
 export function BetModal({ event, prediction, profile, onClose, onSuccess }: BetModalProps) {
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
-  const supabase = createClient();
 
   const odds = prediction === "home" ? event.home_odds : prediction === "draw" ? event.draw_odds! : event.away_odds;
   const numAmount = parseInt(amount) || 0;
@@ -46,43 +44,20 @@ export function BetModal({ event, prediction, profile, onClose, onSuccess }: Bet
 
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No autenticado");
-
-      // Check no active bet
-      const { data: existing } = await supabase
-        .from("bets")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("status", "pending")
-        .maybeSingle();
-
-      if (existing) {
-        toast.error("Ya tienes una apuesta activa. Espera a que se resuelva.");
-        onClose();
-        return;
-      }
-
-      // Create bet
-      const { error: betError } = await supabase.from("bets").insert({
-        user_id: user.id,
-        event_id: event.id,
+      const response = await fetch("/api/bets/place", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId: event.id,
         prediction,
         amount: betAmount,
-        odds,
-        potential_win: potentialWin,
-        status: "pending",
+        }),
       });
 
-      if (betError) throw betError;
-
-      // Deduct points
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({ points: profile.points - betAmount, total_bets: profile.total_bets + 1 })
-        .eq("user_id", user.id);
-
-      if (profileError) throw profileError;
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error ?? "Error al realizar la apuesta");
+      }
 
       toast.success(`¡Apuesta realizada! ${betAmount} pts apostados 🎯`);
       onSuccess();
