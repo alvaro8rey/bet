@@ -21,12 +21,16 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   won_bets INTEGER NOT NULL DEFAULT 0,
   lost_bets INTEGER NOT NULL DEFAULT 0,
   is_admin BOOLEAN NOT NULL DEFAULT false,
+  bankruptcy_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
 
   CONSTRAINT username_length CHECK (char_length(username) >= 3 AND char_length(username) <= 30),
   CONSTRAINT points_non_negative CHECK (points >= 0)
 );
+
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS bankruptcy_at TIMESTAMPTZ;
 
 -- Events table
 CREATE TYPE IF NOT EXISTS public.sport_type AS ENUM (
@@ -169,6 +173,39 @@ CREATE TRIGGER on_redemption_updated
   BEFORE UPDATE ON public.redemptions
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
+-- Prevent browser clients from changing server-owned profile fields.
+-- Service-role operations used by API routes, Edge Functions and admin scripts remain allowed.
+CREATE OR REPLACE FUNCTION public.prevent_client_profile_protected_field_updates()
+RETURNS TRIGGER AS $$
+DECLARE
+  jwt_role TEXT := current_setting('request.jwt.claim.role', true);
+BEGIN
+  IF jwt_role IN ('service_role', 'supabase_admin')
+     OR current_user IN ('postgres', 'service_role', 'supabase_admin') THEN
+    RETURN NEW;
+  END IF;
+
+  IF NEW.id IS DISTINCT FROM OLD.id
+     OR NEW.user_id IS DISTINCT FROM OLD.user_id
+     OR NEW.points IS DISTINCT FROM OLD.points
+     OR NEW.total_bets IS DISTINCT FROM OLD.total_bets
+     OR NEW.won_bets IS DISTINCT FROM OLD.won_bets
+     OR NEW.lost_bets IS DISTINCT FROM OLD.lost_bets
+     OR NEW.is_admin IS DISTINCT FROM OLD.is_admin
+     OR NEW.bankruptcy_at IS DISTINCT FROM OLD.bankruptcy_at
+     OR NEW.created_at IS DISTINCT FROM OLD.created_at THEN
+    RAISE EXCEPTION 'Cannot update protected profile fields from client';
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS protect_profile_server_fields ON public.profiles;
+CREATE TRIGGER protect_profile_server_fields
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.prevent_client_profile_protected_field_updates();
+
 -- =====================================================
 -- ROW LEVEL SECURITY
 -- =====================================================
@@ -189,15 +226,29 @@ CREATE POLICY "Profiles are viewable by everyone"
   ON public.profiles FOR SELECT
   USING (true);
 
--- Users can only update their own profile
+-- Users can only update their own editable profile fields.
+-- A trigger blocks changes to server-owned fields such as points, bet stats and admin flags.
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+DROP POLICY IF EXISTS profiles_update_own ON public.profiles;
 CREATE POLICY "Users can update own profile"
   ON public.profiles FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
 
 -- Users can insert their own profile
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
+DROP POLICY IF EXISTS profiles_insert_own ON public.profiles;
 CREATE POLICY "Users can insert own profile"
   ON public.profiles FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (
+    auth.uid() = user_id
+    AND points = 1000
+    AND total_bets = 0
+    AND won_bets = 0
+    AND lost_bets = 0
+    AND is_admin = false
+    AND bankruptcy_at IS NULL
+  );
 
 -- =====================================================
 -- EVENTS POLICIES

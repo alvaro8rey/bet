@@ -4,8 +4,6 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/types";
 
-const BANKRUPTCY_RESET_POINTS = 1000;
-
 function isNextDay(dateStr: string): boolean {
   const bankruptDate = new Date(dateStr);
   const today = new Date();
@@ -14,30 +12,17 @@ function isNextDay(dateStr: string): boolean {
   return todayDay > bankruptDay;
 }
 
-async function applyBankruptcyResetIfNeeded(
-  supabase: ReturnType<typeof createClient>,
-  data: Profile,
-  userId: string
-): Promise<Profile> {
-  // Auto-reset if it's the next day after bankruptcy
-  if (data.bankruptcy_at && isNextDay(data.bankruptcy_at)) {
-    const { data: updated } = await supabase
-      .from("profiles")
-      .update({ points: BANKRUPTCY_RESET_POINTS, bankruptcy_at: null })
-      .eq("user_id", userId)
-      .select("*")
-      .single();
-    return updated ?? data;
-  }
-  // Clear bankruptcy_at if the user already has points (e.g. added manually)
-  if (data.bankruptcy_at && data.points > 0) {
-    const { data: updated } = await supabase
-      .from("profiles")
-      .update({ bankruptcy_at: null })
-      .eq("user_id", userId)
-      .select("*")
-      .single();
-    return updated ?? data;
+async function applyBankruptcyResetIfNeeded(data: Profile): Promise<Profile> {
+  if (data.bankruptcy_at && (isNextDay(data.bankruptcy_at) || data.points > 0)) {
+    try {
+      const response = await fetch("/api/profile/bankruptcy-reset", { method: "POST" });
+      if (!response.ok) return data;
+      const result = await response.json();
+      return result.profile ?? data;
+    } catch (error) {
+      console.error("Error applying bankruptcy reset:", error);
+      return data;
+    }
   }
   return data;
 }
@@ -57,7 +42,7 @@ export function useProfile() {
 
     if (!data) return;
 
-    const resolved = await applyBankruptcyResetIfNeeded(supabase, data, userId);
+    const resolved = await applyBankruptcyResetIfNeeded(data);
     setProfile(resolved);
     setLoading(false);
   }, [supabase]);
@@ -85,7 +70,7 @@ export function useProfile() {
           async (payload) => {
             if (cancelled) return;
             const updated = payload.new as Profile;
-            const resolved = await applyBankruptcyResetIfNeeded(supabase, updated, user.id);
+            const resolved = await applyBankruptcyResetIfNeeded(updated);
             setProfile(resolved);
           }
         )

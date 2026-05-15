@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { X, Package, Zap } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -29,7 +28,6 @@ export function RedeemModal({ isOpen, onClose, reward, onSuccess }: RedeemModalP
   });
 
   const isDigital = reward.categoria === "digital";
-  const supabase = createClient();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -41,12 +39,6 @@ export function RedeemModal({ isOpen, onClose, reward, onSuccess }: RedeemModalP
     setLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Debes estar logueado para canjear premios");
-        return;
-      }
-
       if (!formData.nombre || !formData.email) {
         toast.error("Por favor completa los campos requeridos");
         setLoading(false);
@@ -59,45 +51,23 @@ export function RedeemModal({ isOpen, onClose, reward, onSuccess }: RedeemModalP
         return;
       }
 
-      const { error: redemptionError } = await supabase
-        .from("redemptions")
-        .insert({
-          user_id: user.id,
-          reward_id: reward.id,
+      const response = await fetch("/api/rewards/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rewardId: reward.id,
           nombre: formData.nombre,
           email: formData.email,
-          telefono: formData.telefono || null,
-          direccion: formData.direccion || null,
-          notas: formData.notas || null,
-          status: "pending",
-        });
+          telefono: formData.telefono,
+          direccion: formData.direccion,
+          notas: formData.notas,
+        }),
+      });
 
-      if (redemptionError) throw redemptionError;
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("points")
-        .eq("user_id", user.id)
-        .single();
-
-      if (profile) {
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({ points: Math.max(0, profile.points - reward.puntos_necesarios) })
-          .eq("user_id", user.id);
-        if (updateError) throw updateError;
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error ?? "Error al procesar la solicitud");
       }
-
-      // Send confirmation email automatically
-      supabase.functions.invoke("send-redemption-email", {
-        body: {
-          email: formData.email,
-          nombre: formData.nombre,
-          reward_nombre: reward.nombre,
-          status: "pending",
-          puntos: reward.puntos_necesarios,
-        },
-      }).catch((err) => console.error("Error sending confirmation email:", err));
 
       toast.success(
         isDigital
@@ -109,7 +79,7 @@ export function RedeemModal({ isOpen, onClose, reward, onSuccess }: RedeemModalP
       setFormData({ nombre: "", email: "", telefono: "", direccion: "", notas: "" });
     } catch (error) {
       console.error("Error redeeming reward:", error);
-      toast.error("Error al procesar la solicitud. Intenta de nuevo.");
+      toast.error(error instanceof Error ? error.message : "Error al procesar la solicitud. Intenta de nuevo.");
     } finally {
       setLoading(false);
     }

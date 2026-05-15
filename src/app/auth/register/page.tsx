@@ -72,11 +72,6 @@ export default function RegisterPage() {
       const { error: profileError } = await supabase.from("profiles").insert({
         user_id: data.user.id,
         username: username.trim(),
-        points: 1000,
-        total_bets: 0,
-        won_bets: 0,
-        lost_bets: 0,
-        is_admin: false,
       });
 
       if (profileError) {
