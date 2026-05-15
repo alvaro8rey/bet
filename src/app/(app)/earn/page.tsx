@@ -32,6 +32,7 @@ export default async function EarnPage() {
   const cpxAppId = process.env.NEXT_PUBLIC_CPX_APP_ID;
   const cpxSecureHash = buildSecureHash(user.id);
   const theoremReachApiKey = process.env.NEXT_PUBLIC_THEOREM_REACH_API_KEY;
+  const bitlabsAppToken = process.env.NEXT_PUBLIC_BITLABS_APP_TOKEN;
 
   const totalEarned = transactions
     ?.filter((t) => !t.reversed)
@@ -67,13 +68,15 @@ export default async function EarnPage() {
       </div>
 
       {/* Offerwall */}
-      {cpxAppId || theoremReachApiKey ? (
+      {cpxAppId || theoremReachApiKey || bitlabsAppToken ? (
         <EarnOfferwall
           cpxAppId={cpxAppId}
           cpxUserId={user.id}
           cpxSecureHash={cpxSecureHash}
           theoremReachApiKey={theoremReachApiKey}
           theoremReachUserId={user.id}
+          bitlabsAppToken={bitlabsAppToken}
+          bitlabsUserId={user.id}
         />
       ) : (
         <Card className="p-10 text-center">

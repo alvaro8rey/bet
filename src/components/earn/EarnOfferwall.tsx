@@ -15,6 +15,8 @@ interface EarnOfferwallProps {
   cpxSecureHash?: string;
   theoremReachApiKey?: string;
   theoremReachUserId?: string;
+  bitlabsAppToken?: string;
+  bitlabsUserId?: string;
 }
 
 export function EarnOfferwall({
@@ -23,6 +25,8 @@ export function EarnOfferwall({
   cpxSecureHash,
   theoremReachApiKey,
   theoremReachUserId,
+  bitlabsAppToken,
+  bitlabsUserId,
 }: EarnOfferwallProps) {
   const [activeTab, setActiveTab] = useState(0);
   const [loaded, setLoaded] = useState<Record<number, boolean>>({});
@@ -42,6 +46,14 @@ export function EarnOfferwall({
       id: "theoremreach",
       label: "Theorem Reach",
       url: `https://theoremreach.com/respondent_entry/direct?api_key=${theoremReachApiKey}&user_id=${theoremReachUserId}`,
+    });
+  }
+
+  if (bitlabsAppToken && bitlabsUserId) {
+    walls.push({
+      id: "bitlabs",
+      label: "BitLabs",
+      url: `https://web.bitlabs.ai?uid=${bitlabsUserId}&token=${bitlabsAppToken}`,
     });
   }
 
