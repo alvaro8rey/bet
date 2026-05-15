@@ -6,15 +6,17 @@ import crypto from "crypto";
 // Params: uid, val (reward points), hash
 // Must respond 200 on success.
 
-function verifyHash(received: string, fullUrl: string): boolean {
+function verifyHash(received: string, parsed: URL): boolean {
   const secret = process.env.BITLABS_SECRET_KEY;
   if (!secret) {
     console.error("BITLABS_SECRET_KEY not configured");
     return false;
   }
-  const urlWithoutHash = fullUrl
-    .replace(/&hash=[^&]+/, "")
-    .replace(/\?hash=[^&]+&?/, "?");
+  // Remove ALL hash params and debug param before hashing
+  const clean = new URL(parsed.toString());
+  clean.searchParams.delete("hash");
+  clean.searchParams.delete("debug");
+  const urlWithoutHash = clean.toString();
 
   const expected = crypto.createHmac("sha1", secret).update(urlWithoutHash).digest("hex");
   console.log(`BitLabs hash check — expected: ${expected} received: ${received}`);
@@ -27,7 +29,9 @@ export async function GET(request: NextRequest) {
 
   const uid = searchParams.get("uid");
   const val = searchParams.get("val");
-  const hash = searchParams.get("hash");
+  // BitLabs may send duplicate hash params — take the last (real) one
+  const hashes = searchParams.getAll("hash");
+  const hash = hashes[hashes.length - 1] ?? null;
   const txId = searchParams.get("transaction_id") ?? searchParams.get("tid") ?? `${val}_${uid}_${Date.now()}`;
 
   if (!uid || !val) {
@@ -40,7 +44,7 @@ export async function GET(request: NextRequest) {
     return new NextResponse("invalid_hash", { status: 403 });
   }
 
-  if (!verifyHash(hash, parsed.toString())) {
+  if (!verifyHash(hash, parsed)) {
     console.warn("BitLabs hash mismatch:", { uid, txId, hash });
     return new NextResponse("invalid_hash", { status: 403 });
   }
