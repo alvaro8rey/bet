@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import toast from "react-hot-toast";
 import { Mail, Lock } from "lucide-react";
+import { GoogleButton } from "@/components/auth/GoogleButton";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -46,6 +47,14 @@ export default function LoginPage() {
         </div>
         <h1 className="font-display font-black text-3xl text-text-primary mb-1">BIENVENIDO</h1>
         <p className="text-text-secondary text-sm">Entra a tu cuenta de SharpBet</p>
+      </div>
+
+      <GoogleButton />
+
+      <div className="flex items-center gap-3 my-2">
+        <div className="flex-1 h-px bg-border" />
+        <span className="text-text-muted text-xs">o con email</span>
+        <div className="flex-1 h-px bg-border" />
       </div>
 
       <form onSubmit={handleLogin} className="space-y-4">

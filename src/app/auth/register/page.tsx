@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import toast from "react-hot-toast";
 import { Mail, Lock, User } from "lucide-react";
+import { GoogleButton } from "@/components/auth/GoogleButton";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -106,6 +107,14 @@ export default function RegisterPage() {
         </div>
         <h1 className="font-display font-black text-3xl text-text-primary mb-1">ÚNETE GRATIS</h1>
         <p className="text-text-secondary text-sm">Empieza con 1.000 puntos de bienvenida</p>
+      </div>
+
+      <GoogleButton />
+
+      <div className="flex items-center gap-3 my-2">
+        <div className="flex-1 h-px bg-border" />
+        <span className="text-text-muted text-xs">o con email</span>
+        <div className="flex-1 h-px bg-border" />
       </div>
 
       <form onSubmit={handleRegister} className="space-y-4">
