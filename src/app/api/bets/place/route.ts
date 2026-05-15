@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
 
   if (!odds) return NextResponse.json({ error: "Cuota no disponible" }, { status: 400 });
 
-  const potentialWin = Math.round(betAmount * odds * 100) / 100;
+  const potentialWin = Math.floor(betAmount * odds);
 
   // Crear apuesta
   const { error: betError } = await admin.from("bets").insert({
