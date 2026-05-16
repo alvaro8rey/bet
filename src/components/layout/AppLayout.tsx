@@ -41,7 +41,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
         {/* Right ad column — desktop only */}
         {ADSTERRA_300x250 && (
-          <aside className="hidden xl:flex flex-col w-[300px] flex-shrink-0 pt-6 pr-4">
+          <aside className="hidden lg:flex flex-col w-[300px] flex-shrink-0 pt-6 pr-4">
             <div className="sticky top-20">
               <AdsterraUnit adKey={ADSTERRA_300x250} width={300} height={250} />
             </div>
