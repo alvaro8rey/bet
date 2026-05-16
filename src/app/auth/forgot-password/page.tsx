@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
         <div className="text-center space-y-4">
           <CheckCircle size={48} className="text-win mx-auto" />
           <p className="text-text-primary font-semibold">Email enviado</p>
-          <p className="text-text-muted text-sm">Revisa tu bandeja de entrada y sigue el link para restablecer tu contraseña.</p>
+          <p className="text-text-muted text-sm">Si el email está registrado en SharpBet, recibirás un enlace para restablecer tu contraseña en breve. Revisa también la carpeta de spam.</p>
           <Link href="/auth/login">
             <Button variant="secondary" fullWidth>Volver al inicio de sesión</Button>
           </Link>
