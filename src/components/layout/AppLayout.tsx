@@ -21,13 +21,13 @@ const AD_SLOT_MOBILE  = "1111111111";
 
 export function AppLayout({ children }: AppLayoutProps) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex flex-col bg-background lg:block lg:min-h-screen" style={{ height: "100dvh" }}>
       <Navbar />
-      <div className="flex pt-16">
+      <div className="flex flex-1 min-h-0 pt-16">
         <Sidebar />
 
         {/* Main content */}
-        <main className="flex-1 lg:ml-64 pb-24 lg:pb-0 min-w-0">
+        <main className="flex-1 overflow-y-auto lg:overflow-visible lg:ml-64 min-w-0">
           <div className="max-w-4xl mx-auto px-4 py-6">
             {children}
           </div>
