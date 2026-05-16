@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/Card";
 import { formatPoints, formatPointsCompact, formatDate, getWinRateColor } from "@/utils";
 import { LogoutButton } from "@/components/profile/LogoutButton";
 import { ProfileEditor } from "@/components/profile/ProfileEditor";
+import { ReferralCard } from "@/components/profile/ReferralCard";
 import Link from "next/link";
 
 export default async function ProfilePage() {
@@ -109,6 +110,14 @@ export default async function ProfilePage() {
             </div>
           </div>
         </Card>
+
+        {/* Referral */}
+        {profile?.referral_code && (
+          <ReferralCard
+            referralCode={profile.referral_code}
+            referralCount={profile.referral_count ?? 0}
+          />
+        )}
 
         {/* Sport breakdown */}
         {Object.keys(sportStats).length > 0 && (

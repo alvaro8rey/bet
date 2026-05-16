@@ -10,6 +10,11 @@ export function GoogleButton() {
 
   const handleGoogle = async () => {
     setLoading(true);
+    // Preserve referral code through OAuth redirect
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref) document.cookie = `ref_code=${ref.toUpperCase()};path=/;max-age=3600`;
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {

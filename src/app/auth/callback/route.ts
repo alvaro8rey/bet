@@ -71,6 +71,17 @@ export async function GET(request: NextRequest) {
       lost_bets: 0,
       is_admin: false,
     });
+
+    // Apply referral if code stored in cookie
+    const refCode = request.cookies.get("ref_code")?.value;
+    if (refCode) {
+      await fetch(`${origin}/api/referral/apply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ referral_code: refCode, new_user_id: user.id }),
+      }).catch(() => {});
+      response.cookies.delete("ref_code");
+    }
   }
 
   return response;

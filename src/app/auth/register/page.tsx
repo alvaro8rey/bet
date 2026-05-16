@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import toast from "react-hot-toast";
-import { Mail, Lock, User } from "lucide-react";
+import { Mail, Lock, User, Gift } from "lucide-react";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { AppleButton } from "@/components/auth/AppleButton";
 
@@ -16,9 +16,20 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [refCode, setRefCode] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
+
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) {
+      setRefCode(ref.toUpperCase());
+      // Save for OAuth flow
+      document.cookie = `ref_code=${ref.toUpperCase()};path=/;max-age=3600`;
+    }
+  }, [searchParams]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +53,6 @@ export default function RegisterPage() {
 
     setLoading(true);
 
-    // Check username availability
     const { data: existing } = await supabase
       .from("profiles")
       .select("id")
@@ -58,9 +68,7 @@ export default function RegisterPage() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { username: username.trim() },
-      },
+      options: { data: { username: username.trim() } },
     });
 
     if (error) {
@@ -70,7 +78,6 @@ export default function RegisterPage() {
     }
 
     if (data.user) {
-      // Create profile
       const { error: profileError } = await supabase.from("profiles").insert({
         user_id: data.user.id,
         username: username.trim(),
@@ -83,16 +90,33 @@ export default function RegisterPage() {
 
       if (profileError) {
         toast.error("Error al crear el perfil. Por favor intenta de nuevo.");
-        console.error("Profile creation error:", profileError);
         setLoading(false);
         return;
       }
 
-      toast.success("¡Cuenta creada! Recibes 1.000 puntos de bienvenida 🎉");
+      // Apply referral if code provided
+      if (refCode.trim()) {
+        try {
+          const res = await fetch("/api/referral/apply", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ referral_code: refCode.trim(), new_user_id: data.user.id }),
+          });
+          const json = await res.json();
+          if (res.ok) {
+            toast.success(`¡Cuenta creada! Recibes 1.500 puntos (1.000 de bienvenida + 500 por referido) 🎉`);
+          } else {
+            toast.success("¡Cuenta creada! Recibes 1.000 puntos de bienvenida 🎉");
+            if (json.error) console.warn("Referral error:", json.error);
+          }
+        } catch {
+          toast.success("¡Cuenta creada! Recibes 1.000 puntos de bienvenida 🎉");
+        }
+      } else {
+        toast.success("¡Cuenta creada! Recibes 1.000 puntos de bienvenida 🎉");
+      }
 
-      // Wait a moment for session to sync
       await new Promise(resolve => setTimeout(resolve, 500));
-
       router.push("/dashboard");
     }
 
@@ -101,13 +125,14 @@ export default function RegisterPage() {
 
   return (
     <div className="relative bg-surface border border-border rounded-3xl shadow-card p-8 animate-slide-up">
-      {/* Header */}
       <div className="text-center mb-8">
         <div className="w-14 h-14 bg-accent-muted border border-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <span className="text-2xl">🚀</span>
         </div>
         <h1 className="font-display font-black text-3xl text-text-primary mb-1">ÚNETE GRATIS</h1>
-        <p className="text-text-secondary text-sm">Empieza con 1.000 puntos de bienvenida</p>
+        <p className="text-text-secondary text-sm">
+          {refCode ? "¡Código de referido aplicado! +500 pts extra" : "Empieza con 1.000 puntos de bienvenida"}
+        </p>
       </div>
 
       <GoogleButton />
@@ -155,6 +180,14 @@ export default function RegisterPage() {
           placeholder="Repite la contraseña"
           autoComplete="new-password"
           leftIcon={<Lock size={16} />}
+        />
+        <Input
+          label="Código de referido (opcional)"
+          type="text"
+          value={refCode}
+          onChange={(e) => setRefCode(e.target.value.toUpperCase())}
+          placeholder="XXXXXXXX"
+          leftIcon={<Gift size={16} />}
         />
 
         <Button type="submit" fullWidth size="lg" loading={loading} className="mt-6">
