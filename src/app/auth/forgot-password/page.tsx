@@ -41,30 +41,34 @@ export default function ForgotPasswordPage() {
           <CheckCircle size={48} className="text-win mx-auto" />
           <p className="text-text-primary font-semibold">Email enviado</p>
           <p className="text-text-muted text-sm">Si el email está registrado en SharpBet, recibirás un enlace para restablecer tu contraseña en breve. Revisa también la carpeta de spam.</p>
-          <Link href="/auth/login">
-            <Button variant="secondary" fullWidth>Volver al inicio de sesión</Button>
-          </Link>
+          <div className="pt-2">
+            <Link href="/auth/login">
+              <Button variant="secondary" fullWidth>Volver al inicio de sesión</Button>
+            </Link>
+          </div>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="tu@email.com"
-            autoComplete="email"
-            leftIcon={<Mail size={16} />}
-          />
-          <Button type="submit" fullWidth size="lg" loading={loading}>
-            Enviar link de recuperación
-          </Button>
-        </form>
-      )}
+        <>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="tu@email.com"
+              autoComplete="email"
+              leftIcon={<Mail size={16} />}
+            />
+            <Button type="submit" fullWidth size="lg" loading={loading}>
+              Enviar link de recuperación
+            </Button>
+          </form>
 
-      <Link href="/auth/login" className="flex items-center justify-center gap-1.5 text-text-muted hover:text-text-secondary text-sm mt-6 transition">
-        <ArrowLeft size={14} /> Volver al inicio de sesión
-      </Link>
+          <Link href="/auth/login" className="flex items-center justify-center gap-1.5 text-text-muted hover:text-text-secondary text-sm mt-6 transition">
+            <ArrowLeft size={14} /> Volver al inicio de sesión
+          </Link>
+        </>
+      )}
     </div>
   );
 }
