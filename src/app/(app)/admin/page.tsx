@@ -30,17 +30,23 @@ export default async function AdminPage() {
             <h1 className="font-display font-black text-3xl text-text-primary mb-1">Panel Admin</h1>
             <p className="text-text-muted text-sm">Gestión de eventos, premios y resultados</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Link href="/admin/users">
+              <Button variant="secondary">
+                <Users size={16} />
+                Usuarios
+              </Button>
+            </Link>
             <Link href="/admin/rewards">
               <Button variant="secondary">
                 <Package size={16} />
-                Gestionar Premios
+                Premios
               </Button>
             </Link>
             <Link href="/admin/import">
               <Button variant="secondary">
                 <Download size={16} />
-                Importar desde API
+                Importar API
               </Button>
             </Link>
             <Link href="/admin/events/new">
@@ -54,13 +60,15 @@ export default async function AdminPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Users size={16} className="text-blue" />
-              <span className="text-text-muted text-xs">Usuarios</span>
-            </div>
-            <p className="text-text-primary font-bold text-2xl">{usersCount || 0}</p>
-          </Card>
+          <Link href="/admin/users">
+            <Card className="p-4 hover:border-accent/50 transition">
+              <div className="flex items-center gap-2 mb-2">
+                <Users size={16} className="text-blue" />
+                <span className="text-text-muted text-xs">Usuarios</span>
+              </div>
+              <p className="text-text-primary font-bold text-2xl">{usersCount || 0}</p>
+            </Card>
+          </Link>
           <Card className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <Calendar size={16} className="text-accent" />
