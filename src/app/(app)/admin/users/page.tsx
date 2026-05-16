@@ -15,12 +15,13 @@ export default async function AdminUsersPage() {
   if (!me?.is_admin) redirect("/dashboard");
 
   const admin = await createAdminClient();
-  const { data: users } = await admin
-    .from("profiles")
-    .select("user_id, username, points, total_bets, won_bets, lost_bets, referral_count, is_admin, created_at, avatar_url")
-    .order("created_at", { ascending: false });
+  const [{ data: users }, { data: authData }] = await Promise.all([
+    admin.from("profiles").select("user_id, username, points, total_bets, won_bets, lost_bets, referral_count, is_admin, created_at, avatar_url").order("created_at", { ascending: false }),
+    admin.auth.admin.listUsers({ perPage: 1000 }),
+  ]);
 
-  const allUsers = users ?? [];
+  const emailMap = Object.fromEntries((authData?.users ?? []).map((u) => [u.id, u.email ?? ""]));
+  const allUsers = (users ?? []).map((u) => ({ ...u, email: emailMap[u.user_id] ?? "" }));
   const totalPoints = allUsers.reduce((acc, u) => acc + (u.points ?? 0), 0);
   const activeUsers = allUsers.filter((u) => u.total_bets > 0).length;
 
