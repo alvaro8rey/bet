@@ -23,9 +23,7 @@ export function ReferralCard({ referralCode, referralCount }: ReferralCardProps)
   const handleShare = async () => {
     if (navigator.share) {
       await navigator.share({
-        title: "SharpBet — Predicciones deportivas",
-        text: `Únete a SharpBet con mi código ${referralCode} y ambos recibimos 500 puntos gratis 🎯`,
-        url: referralLink,
+        text: `Únete a SharpBet con mi código ${referralCode} y ambos recibimos 500 puntos gratis 🎯\n\n${referralLink}`,
       }).catch(() => {});
     }
   };
