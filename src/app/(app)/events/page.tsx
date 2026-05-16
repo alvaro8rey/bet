@@ -36,12 +36,13 @@ export default function EventsPage() {
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
-    let query = supabase.from("events").select("*").order("event_date", { ascending: true });
+    let query = supabase.from("events").select("*");
 
     if (filter === "pending") {
-      query = query.in("status", ["pending", "live"]).gt("event_date", new Date().toISOString());
+      query = query.in("status", ["pending", "live"]).gt("event_date", new Date().toISOString()).order("event_date", { ascending: true });
     } else {
-      query = query.in("status", ["finished", "cancelled"]);
+      const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+      query = query.in("status", ["finished", "cancelled"]).gte("event_date", twoDaysAgo).order("event_date", { ascending: false });
     }
 
     if (sportFilter !== "all") {
