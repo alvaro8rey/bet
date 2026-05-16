@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Navbar } from "./Navbar";
 import { Sidebar } from "./Sidebar";
 import { BottomNav } from "./BottomNav";
-import { AdBanner } from "@/components/ads/AdBanner";
+import { AdsterraUnit } from "@/components/ads/AdsterraUnit";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -15,9 +15,8 @@ const LEGAL_LINKS = [
   { href: "/como-ganar-puntos", label: "Cómo ganar puntos" },
 ];
 
-// TODO: replace with real Ad Slot IDs from AdSense dashboard once approved
-const AD_SLOT_SIDEBAR = "0000000000";
-const AD_SLOT_MOBILE  = "1111111111";
+const ADSTERRA_300x250 = process.env.NEXT_PUBLIC_ADSTERRA_KEY_300x250;
+const ADSTERRA_320x50  = process.env.NEXT_PUBLIC_ADSTERRA_KEY_320x50;
 
 export function AppLayout({ children }: AppLayoutProps) {
   return (
@@ -41,16 +40,21 @@ export function AppLayout({ children }: AppLayoutProps) {
         </main>
 
         {/* Right ad column — desktop only */}
-        <aside className="hidden xl:flex flex-col w-[300px] flex-shrink-0 pt-6 pr-4">
-          <div className="sticky top-20">
-            <AdBanner
-              slot={AD_SLOT_SIDEBAR}
-              format="vertical"
-              className="w-[300px] min-h-[600px]"
-            />
-          </div>
-        </aside>
+        {ADSTERRA_300x250 && (
+          <aside className="hidden xl:flex flex-col w-[300px] flex-shrink-0 pt-6 pr-4">
+            <div className="sticky top-20">
+              <AdsterraUnit adKey={ADSTERRA_300x250} width={300} height={250} />
+            </div>
+          </aside>
+        )}
       </div>
+
+      {/* Mobile banner — 320x50 above bottom nav */}
+      {ADSTERRA_320x50 && (
+        <div className="lg:hidden flex justify-center bg-background border-t border-border/50">
+          <AdsterraUnit adKey={ADSTERRA_320x50} width={320} height={50} />
+        </div>
+      )}
 
       <BottomNav />
     </div>
