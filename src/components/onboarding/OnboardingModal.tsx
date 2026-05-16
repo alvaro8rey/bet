@@ -9,7 +9,7 @@ const steps = [
   {
     icon: "🎉",
     title: "Bienvenido a SharpBet",
-    description: "La plataforma de predicciones deportivas con puntos virtuales. Sin dinero real, sin riesgo.",
+    description: "Predice resultados deportivos, compite con otros usuarios y gana premios reales. Todo con puntos virtuales.",
     highlight: "Tienes 1.000 puntos para empezar",
     highlightColor: "text-accent",
     detail: "Usa tus puntos para predecir resultados deportivos y compite con otros usuarios en la clasificación.",
