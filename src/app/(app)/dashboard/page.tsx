@@ -52,7 +52,7 @@ export default async function DashboardPage() {
 
   return (
       <div className="space-y-6 animate-fade-in">
-        <OnboardingModal username={profile?.username} />
+        <OnboardingModal username={profile?.username} onboardingDone={profile?.onboarding_done ?? false} />
         {/* Welcome */}
         <div className="flex items-start justify-between">
           <div>

@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { X, ChevronRight, ChevronLeft, Zap, Gift, Trophy, TrendingUp } from "lucide-react";
-
-const STORAGE_KEY = "sharpbet_onboarding_done";
+import { createClient } from "@/lib/supabase/client";
 
 const steps = [
   {
@@ -97,20 +96,21 @@ const steps = [
   },
 ];
 
-export function OnboardingModal({ username }: { username?: string }) {
+export function OnboardingModal({ username, onboardingDone }: { username?: string; onboardingDone?: boolean }) {
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState(0);
   const [exiting, setExiting] = useState(false);
+  const supabase = createClient();
 
   useEffect(() => {
-    if (!localStorage.getItem(STORAGE_KEY)) {
-      setVisible(true);
-    }
-  }, []);
+    if (!onboardingDone) setVisible(true);
+  }, [onboardingDone]);
 
   const close = () => {
-    localStorage.setItem(STORAGE_KEY, "1");
     setExiting(true);
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) supabase.from("profiles").update({ onboarding_done: true }).eq("user_id", user.id).then(() => {});
+    });
     setTimeout(() => setVisible(false), 300);
   };
 
