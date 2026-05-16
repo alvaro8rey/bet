@@ -15,8 +15,8 @@ const LEGAL_LINKS = [
   { href: "/como-ganar-puntos", label: "Cómo ganar puntos" },
 ];
 
-const ADSTERRA_300x250 = process.env.NEXT_PUBLIC_ADSTERRA_KEY_300x250;
-const ADSTERRA_320x50  = process.env.NEXT_PUBLIC_ADSTERRA_KEY_320x50;
+const ADSTERRA_300x250 = "789b5ee37dbebca06e32b1d84247c967";
+const ADSTERRA_320x50  = "dae339dd05e406edbd65799672f60e96";
 
 export function AppLayout({ children }: AppLayoutProps) {
   return (
