@@ -10,6 +10,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { TrendingUp, TrendingDown, Ticket, Target } from "lucide-react";
 import type { Event, Profile } from "@/types";
+import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -51,6 +52,7 @@ export default async function DashboardPage() {
 
   return (
       <div className="space-y-6 animate-fade-in">
+        <OnboardingModal username={profile?.username} />
         {/* Welcome */}
         <div className="flex items-start justify-between">
           <div>
