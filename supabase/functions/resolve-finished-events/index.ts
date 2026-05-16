@@ -33,23 +33,25 @@ serve(async (req) => {
     // Get all pending events linked to the API
     const { data: pendingEvents, error: eventsError } = await supabase
       .from("events")
-      .select("id, api_event_id, api_sport_key, home_team, away_team")
+      .select("id, api_event_id, api_sport_key, home_team, away_team, event_date")
       .eq("status", "pending")
       .not("api_event_id", "is", null);
 
     if (eventsError) throw eventsError;
     if (!pendingEvents?.length) {
-      return new Response(JSON.stringify({ message: "No pending API events" }), {
+      return new Response(JSON.stringify({ message: "No pending API events", resolved: [], errors: [], total_checked: 0 }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     console.log(`Checking ${pendingEvents.length} pending events`);
 
-    // Group by sport key to minimize API calls
+    // Only check sports that have events whose date has already passed
+    const now = new Date();
     const bySport = new Map<string, typeof pendingEvents>();
     for (const ev of pendingEvents) {
-      if (!ev.api_sport_key) continue;
+      if (!ev.api_sport_key || !ev.event_date) continue;
+      if (new Date(ev.event_date) > now) continue; // not started yet
       if (!bySport.has(ev.api_sport_key)) bySport.set(ev.api_sport_key, []);
       bySport.get(ev.api_sport_key)!.push(ev);
     }
