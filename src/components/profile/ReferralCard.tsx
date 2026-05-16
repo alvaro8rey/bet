@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Check, Users, Gift } from "lucide-react";
+import { Copy, Check, Users, Gift, Share2 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 
 interface ReferralCardProps {
@@ -20,6 +20,18 @@ export function ReferralCard({ referralCode, referralCount }: ReferralCardProps)
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleShare = async () => {
+    if (navigator.share) {
+      await navigator.share({
+        title: "SharpBet — Predicciones deportivas",
+        text: `Únete a SharpBet con mi código ${referralCode} y ambos recibimos 500 puntos gratis 🎯`,
+        url: referralLink,
+      }).catch(() => {});
+    }
+  };
+
+  const canShare = typeof navigator !== "undefined" && !!navigator.share;
+
   return (
     <Card className="p-5">
       <div className="flex items-center gap-2 mb-4">
@@ -32,18 +44,29 @@ export function ReferralCard({ referralCode, referralCount }: ReferralCardProps)
       </p>
 
       {/* Code */}
-      <div className="flex items-center gap-2 mb-3">
-        <div className="flex-1 bg-surface-2 border border-border rounded-xl px-4 py-2.5">
-          <p className="text-xs text-text-muted mb-0.5">Tu código</p>
-          <p className="text-accent font-bold font-mono tracking-widest">{referralCode}</p>
-        </div>
+      <div className="bg-surface-2 border border-border rounded-xl px-4 py-2.5 mb-3">
+        <p className="text-xs text-text-muted mb-0.5">Tu código</p>
+        <p className="text-accent font-bold font-mono tracking-widest">{referralCode}</p>
+      </div>
+
+      {/* Buttons */}
+      <div className="flex gap-2 mb-3">
         <button
           onClick={handleCopy}
-          className="flex items-center gap-2 px-4 py-3 bg-accent hover:bg-accent/80 text-background rounded-xl font-medium text-sm transition flex-shrink-0"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-2 hover:bg-surface-3 border border-border text-text-primary rounded-xl font-medium text-sm transition"
         >
-          {copied ? <Check size={16} /> : <Copy size={16} />}
+          {copied ? <Check size={16} className="text-win" /> : <Copy size={16} />}
           {copied ? "¡Copiado!" : "Copiar enlace"}
         </button>
+        {canShare && (
+          <button
+            onClick={handleShare}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent/80 text-background rounded-xl font-medium text-sm transition"
+          >
+            <Share2 size={16} />
+            Compartir
+          </button>
+        )}
       </div>
 
       {/* Stats */}
