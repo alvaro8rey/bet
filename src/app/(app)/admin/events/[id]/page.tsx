@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/Button";
 import { PageLoader } from "@/components/ui/Spinner";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
+import { AdminBreadcrumb } from "@/components/admin/AdminBreadcrumb";
 import type { Event, BetResult } from "@/types";
 import { resolveEvent } from "../actions";
 
@@ -127,10 +128,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
   return (
       <div className="max-w-2xl space-y-6 animate-fade-in">
+        <AdminBreadcrumb items={[{ label: "Eventos", href: "/admin/events" }, { label: `${event.home_team} vs ${event.away_team}` }]} />
         <div className="flex items-center gap-3">
-          <Link href="/admin">
-            <Button variant="ghost" size="sm"><ArrowLeft size={16} /> Volver</Button>
-          </Link>
           <div>
             <h1 className="font-display font-black text-3xl text-text-primary">Editar Evento</h1>
             <p className="text-text-muted text-sm">{event.home_team} vs {event.away_team}</p>

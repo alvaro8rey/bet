@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { Plus, Edit, Trash2 } from "lucide-react";
+import { AdminBreadcrumb } from "@/components/admin/AdminBreadcrumb";
 
 interface Reward {
   id: number;
@@ -32,6 +33,7 @@ export default async function AdminRewardsPage() {
 
   return (
       <div className="space-y-6 animate-fade-in">
+        <AdminBreadcrumb items={[{ label: "Premios" }]} />
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-display font-black text-3xl text-text-primary mb-1">Gestión de Premios</h1>

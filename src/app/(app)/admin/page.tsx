@@ -2,9 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
-import { formatPoints, getSportIcon, formatDateShort, getEventStatusLabel } from "@/utils";
-import { Plus, Users, Calendar, Ticket, Gift, Package, Download } from "lucide-react";
+import { formatPoints } from "@/utils";
+import {
+  Users, Calendar, Ticket, Gift, Package,
+  Download, ChevronRight, Plus, AlertTriangle,
+} from "lucide-react";
 
 export default async function AdminPage() {
   const supabase = await createClient();
@@ -14,137 +16,194 @@ export default async function AdminPage() {
   const { data: profile } = await supabase.from("profiles").select("is_admin").eq("user_id", user.id).single();
   if (!profile?.is_admin) redirect("/dashboard");
 
-  const [{ data: events }, { count: pendingBets }, { count: usersCount }, { count: pendingRedemptions }] = await Promise.all([
-    supabase.from("events").select("*").order("event_date", { ascending: false }).limit(10),
-    supabase.from("bets").select("id", { count: "exact", head: true }).eq("status", "pending"),
+  const [
+    { count: usersCount },
+    { count: pendingBets },
+    { count: pendingEvents },
+    { count: liveEvents },
+    { count: pendingRedemptions },
+    { count: rewardsCount },
+    { data: totalPointsData },
+    { data: needsResolution },
+  ] = await Promise.all([
     supabase.from("profiles").select("id", { count: "exact", head: true }),
+    supabase.from("bets").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    supabase.from("events").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    supabase.from("events").select("id", { count: "exact", head: true }).eq("status", "live"),
     supabase.from("redemptions").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    supabase.from("rewards").select("id", { count: "exact", head: true }),
+    supabase.from("profiles").select("points"),
+    // Events past their date still pending
+    supabase.from("events")
+      .select("id, home_team, away_team, event_date")
+      .eq("status", "pending")
+      .lt("event_date", new Date().toISOString())
+      .order("event_date", { ascending: false })
+      .limit(5),
   ]);
 
-  const pendingEvents = events?.filter((e) => e.status === "pending").length || 0;
+  const totalPoints = (totalPointsData ?? []).reduce((acc: number, p: any) => acc + (p.points ?? 0), 0);
+
+  const sections = [
+    {
+      href: "/admin/events",
+      icon: Calendar,
+      label: "Eventos",
+      description: "Gestiona todos los eventos y resultados",
+      badge: (pendingEvents ?? 0) + (liveEvents ?? 0),
+      badgeLabel: "activos",
+      color: "text-accent",
+      accent: "group-hover:border-accent/40",
+      quick: { href: "/admin/events/new", label: "Nuevo", icon: Plus },
+    },
+    {
+      href: "/admin/import",
+      icon: Download,
+      label: "Importar partidos",
+      description: "Importa eventos desde la API con cuotas reales",
+      badge: null,
+      color: "text-blue",
+      accent: "group-hover:border-blue/40",
+    },
+    {
+      href: "/admin/users",
+      icon: Users,
+      label: "Usuarios",
+      description: "Consulta, ajusta puntos y gestiona admins",
+      badge: usersCount ?? 0,
+      badgeLabel: "registrados",
+      color: "text-purple-400",
+      accent: "group-hover:border-purple-400/40",
+    },
+    {
+      href: "/admin/rewards",
+      icon: Package,
+      label: "Premios",
+      description: "Crea y edita el catálogo de premios canjeables",
+      badge: rewardsCount ?? 0,
+      badgeLabel: "premios",
+      color: "text-gold",
+      accent: "group-hover:border-gold/40",
+      quick: { href: "/admin/rewards/new", label: "Nuevo", icon: Plus },
+    },
+    {
+      href: "/admin/redemptions",
+      icon: Gift,
+      label: "Canjes",
+      description: "Procesa las solicitudes de canje de premios",
+      badge: pendingRedemptions ?? 0,
+      badgeLabel: "pendientes",
+      badgeAlert: (pendingRedemptions ?? 0) > 0,
+      color: "text-win",
+      accent: "group-hover:border-win/40",
+    },
+  ];
 
   return (
-      <div className="space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-display font-black text-3xl text-text-primary mb-1">Panel Admin</h1>
-            <p className="text-text-muted text-sm">Gestión de eventos, premios y resultados</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link href="/admin/users">
-              <Button variant="secondary">
-                <Users size={16} />
-                Usuarios
-              </Button>
-            </Link>
-            <Link href="/admin/rewards">
-              <Button variant="secondary">
-                <Package size={16} />
-                Premios
-              </Button>
-            </Link>
-            <Link href="/admin/import">
-              <Button variant="secondary">
-                <Download size={16} />
-                Importar API
-              </Button>
-            </Link>
-            <Link href="/admin/events/new">
-              <Button>
-                <Plus size={16} />
-                Nuevo evento
-              </Button>
-            </Link>
-          </div>
-        </div>
+    <div className="space-y-8 animate-fade-in">
+      <div>
+        <h1 className="font-display font-black text-3xl text-text-primary mb-1">Panel Admin</h1>
+        <p className="text-text-muted text-sm">Gestión completa de SharpBet</p>
+      </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-          <Link href="/admin/users">
-            <Card className="p-4 hover:border-accent/50 transition">
-              <div className="flex items-center gap-2 mb-2">
-                <Users size={16} className="text-blue" />
-                <span className="text-text-muted text-xs">Usuarios</span>
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Card className="p-4">
+          <p className="text-text-muted text-xs mb-1">Usuarios</p>
+          <p className="text-text-primary font-bold text-2xl">{usersCount ?? 0}</p>
+        </Card>
+        <Card className="p-4">
+          <p className="text-text-muted text-xs mb-1">Apuestas activas</p>
+          <p className="text-pending font-bold text-2xl">{pendingBets ?? 0}</p>
+        </Card>
+        <Card className="p-4">
+          <p className="text-text-muted text-xs mb-1">Canjes pendientes</p>
+          <p className={`font-bold text-2xl ${(pendingRedemptions ?? 0) > 0 ? "text-loss" : "text-text-primary"}`}>
+            {pendingRedemptions ?? 0}
+          </p>
+        </Card>
+        <Card className="p-4">
+          <p className="text-text-muted text-xs mb-1">Pts en circulación</p>
+          <p className="text-accent font-bold text-xl">{formatPoints(totalPoints)}</p>
+        </Card>
+      </div>
+
+      {/* Alert: events needing resolution */}
+      {(needsResolution?.length ?? 0) > 0 && (
+        <div className="bg-pending/10 border border-pending/30 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle size={18} className="text-pending flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-pending font-semibold text-sm mb-2">
+                {needsResolution!.length} evento{needsResolution!.length > 1 ? "s" : ""} sin resolver
+              </p>
+              <div className="space-y-1">
+                {needsResolution!.map((e: any) => (
+                  <Link
+                    key={e.id}
+                    href={`/admin/events/${e.id}`}
+                    className="flex items-center justify-between text-xs text-text-secondary hover:text-accent transition py-0.5"
+                  >
+                    <span className="truncate">{e.home_team} vs {e.away_team}</span>
+                    <ChevronRight size={12} className="flex-shrink-0 ml-2" />
+                  </Link>
+                ))}
               </div>
-              <p className="text-text-primary font-bold text-2xl">{usersCount || 0}</p>
-            </Card>
-          </Link>
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Calendar size={16} className="text-accent" />
-              <span className="text-text-muted text-xs">Eventos</span>
+              {(pendingEvents ?? 0) > 5 && (
+                <Link href="/admin/events" className="text-xs text-pending/70 hover:text-pending transition mt-1 block">
+                  Ver todos →
+                </Link>
+              )}
             </div>
-            <p className="text-text-primary font-bold text-2xl">{events?.length || 0}</p>
-          </Card>
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Calendar size={16} className="text-pending" />
-              <span className="text-text-muted text-xs">Pendientes</span>
-            </div>
-            <p className="text-pending font-bold text-2xl">{pendingEvents}</p>
-          </Card>
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Ticket size={16} className="text-text-muted" />
-              <span className="text-text-muted text-xs">Apuestas activas</span>
-            </div>
-            <p className="text-text-primary font-bold text-2xl">{pendingBets}</p>
-          </Card>
-          <Card className="p-4">
-            <Link href="/admin/redemptions" className="flex items-center gap-2 mb-2 hover:text-accent transition">
-              <Gift size={16} className="text-gold" />
-              <span className="text-text-muted text-xs">Canjes</span>
-            </Link>
-            <p className="text-text-primary font-bold text-2xl">{pendingRedemptions}</p>
-          </Card>
-        </div>
-
-        {/* Events list */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display font-bold text-xl text-text-primary">Todos los Eventos</h2>
-            <Link href="/admin/events/new">
-              <Button variant="secondary" size="sm">
-                <Plus size={14} />
-                Crear
-              </Button>
-            </Link>
           </div>
+        </div>
+      )}
 
-          <div className="space-y-2">
-            {events?.map((event) => (
-              <Card key={event.id} className="p-4">
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">{getSportIcon(event.sport)}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-text-primary font-semibold text-sm">
-                      {event.home_team} vs {event.away_team}
-                    </p>
-                    <div className="flex items-center gap-3 mt-0.5">
-                      <p className="text-text-muted text-xs">{event.competition}</p>
-                      <p className="text-text-muted text-xs">·</p>
-                      <p className="text-text-muted text-xs">{formatDateShort(event.event_date)}</p>
+      {/* Section cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {sections.map((s) => {
+          const Icon = s.icon;
+          return (
+            <Card key={s.href} className={`group p-5 transition-all hover:border-border/80 ${s.accent} cursor-pointer`}>
+              <Link href={s.href} className="flex items-start gap-4">
+                <div className={`mt-0.5 flex-shrink-0 ${s.color}`}>
+                  <Icon size={22} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-text-primary font-semibold">{s.label}</p>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {s.badge !== null && s.badge !== undefined && (
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                          (s as any).badgeAlert
+                            ? "bg-loss/15 text-loss"
+                            : "bg-surface-3 text-text-muted"
+                        }`}>
+                          {s.badge} {(s as any).badgeLabel}
+                        </span>
+                      )}
+                      <ChevronRight size={16} className="text-text-muted group-hover:text-accent transition" />
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs font-medium px-2 py-1 rounded-lg ${
-                      event.status === "pending" ? "bg-pending/10 text-pending" :
-                      event.status === "live" ? "bg-loss/10 text-loss" :
-                      event.status === "finished" ? "bg-surface-3 text-text-muted" :
-                      "bg-surface-3 text-text-muted"
-                    }`}>
-                      {getEventStatusLabel(event.status)}
-                    </span>
-                    <Link href={`/admin/events/${event.id}`}>
-                      <Button variant="secondary" size="sm">Editar</Button>
-                    </Link>
-                  </div>
+                  <p className="text-text-muted text-xs mt-1">{s.description}</p>
                 </div>
-              </Card>
-            ))}
-          </div>
-        </div>
+              </Link>
+              {(s as any).quick && (
+                <div className="mt-3 pt-3 border-t border-border">
+                  <Link
+                    href={(s as any).quick.href}
+                    className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-accent transition font-medium"
+                  >
+                    <Plus size={12} />
+                    {(s as any).quick.label}
+                  </Link>
+                </div>
+              )}
+            </Card>
+          );
+        })}
       </div>
+    </div>
   );
 }
 

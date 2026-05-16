@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardHeader, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { ArrowLeft, Download, RefreshCw, CheckCircle, AlertCircle } from "lucide-react";
+import { Download, RefreshCw, CheckCircle, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { AdminBreadcrumb } from "@/components/admin/AdminBreadcrumb";
 import { getSportIcon } from "@/utils";
 import type { Sport } from "@/types";
 import toast from "react-hot-toast";
@@ -174,10 +175,8 @@ export default function ImportEventsPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <AdminBreadcrumb items={[{ label: "Eventos", href: "/admin/events" }, { label: "Importar partidos" }]} />
       <div className="flex items-center gap-3 flex-wrap">
-        <Link href="/admin">
-          <Button variant="ghost" size="sm"><ArrowLeft size={16} /> Volver</Button>
-        </Link>
         <div className="flex-1">
           <h1 className="font-display font-black text-3xl text-text-primary">Importar Partidos</h1>
           <p className="text-text-muted text-sm">Selecciona partidos de la API y publícalos con cuotas reales</p>

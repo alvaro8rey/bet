@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card } from "@/components/ui/Card";
 import { RedemptionCard } from "@/components/RedemptionCard";
+import { AdminBreadcrumb } from "@/components/admin/AdminBreadcrumb";
 import toast from "react-hot-toast";
 
 interface Redemption {
@@ -129,6 +130,7 @@ export default function AdminRedemptionsPage() {
 
   return (
       <div className="space-y-6 animate-fade-in">
+        <AdminBreadcrumb items={[{ label: "Canjes" }]} />
         <div>
           <h1 className="font-display font-black text-3xl text-text-primary mb-1">Canjes de Premios</h1>
           <p className="text-text-muted text-sm">Gestión de canjes realizados por usuarios</p>

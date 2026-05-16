@@ -9,7 +9,8 @@ import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { ArrowLeft, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
+import { AdminBreadcrumb } from "@/components/admin/AdminBreadcrumb";
 
 const CATEGORY_OPTIONS = [
   { value: "digital", label: "Digital" },
@@ -86,13 +87,8 @@ export default function NewRewardPage() {
 
   return (
       <div className="max-w-2xl space-y-6 animate-fade-in">
+        <AdminBreadcrumb items={[{ label: "Premios", href: "/admin/rewards" }, { label: "Nuevo premio" }]} />
         <div className="flex items-center gap-3">
-          <Link href="/admin/rewards">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft size={16} />
-              Volver
-            </Button>
-          </Link>
           <div>
             <h1 className="font-display font-black text-3xl text-text-primary">Nuevo Premio</h1>
             <p className="text-text-muted text-sm">Crea un nuevo premio para los usuarios</p>

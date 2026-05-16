@@ -9,7 +9,7 @@ import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { AdminBreadcrumb } from "@/components/admin/AdminBreadcrumb";
 import type { Sport } from "@/types";
 
 const SPORT_OPTIONS = [
@@ -79,13 +79,8 @@ export default function NewEventPage() {
 
   return (
       <div className="max-w-2xl space-y-6 animate-fade-in">
+        <AdminBreadcrumb items={[{ label: "Eventos", href: "/admin/events" }, { label: "Nuevo evento" }]} />
         <div className="flex items-center gap-3">
-          <Link href="/admin">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft size={16} />
-              Volver
-            </Button>
-          </Link>
           <div>
             <h1 className="font-display font-black text-3xl text-text-primary">Nuevo Evento</h1>
             <p className="text-text-muted text-sm">Crea un evento deportivo para predicciones</p>

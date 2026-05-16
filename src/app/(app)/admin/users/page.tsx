@@ -2,6 +2,7 @@ import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { Users, TrendingUp, Coins } from "lucide-react";
+import { AdminBreadcrumb } from "@/components/admin/AdminBreadcrumb";
 import { formatPoints } from "@/utils";
 import { UsersTable } from "@/components/admin/UsersTable";
 
@@ -25,6 +26,7 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <AdminBreadcrumb items={[{ label: "Usuarios" }]} />
       <div>
         <h1 className="font-display font-black text-3xl text-text-primary mb-1">Usuarios</h1>
         <p className="text-text-muted text-sm">{allUsers.length} usuarios registrados</p>
