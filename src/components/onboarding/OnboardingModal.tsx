@@ -109,11 +109,9 @@ export function OnboardingModal({ username }: { username?: string }) {
   }, []);
 
   const close = () => {
+    localStorage.setItem(STORAGE_KEY, "1");
     setExiting(true);
-    setTimeout(() => {
-      localStorage.setItem(STORAGE_KEY, "1");
-      setVisible(false);
-    }, 300);
+    setTimeout(() => setVisible(false), 300);
   };
 
   const next = () => {
