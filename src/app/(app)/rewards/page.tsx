@@ -49,11 +49,12 @@ function DenominationChip({
 
   return (
     <button
-      onClick={onClick}
+      onClick={unlocked ? onClick : undefined}
+      disabled={!unlocked}
       className={`relative flex flex-col items-center gap-1 px-4 py-3 rounded-xl border transition-all min-w-[100px] ${
         unlocked
           ? "border-accent/50 bg-accent/5 hover:bg-accent/10"
-          : "border-border bg-surface-2 hover:border-border/80"
+          : "border-border bg-surface-2 cursor-not-allowed opacity-60"
       }`}
     >
       <span className={`font-bold text-lg ${unlocked ? "text-accent" : "text-text-primary"}`}>
