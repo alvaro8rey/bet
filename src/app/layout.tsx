@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Toaster } from "react-hot-toast";
 import { Analytics } from "@vercel/analytics/react";
 import { PWARegister } from "@/components/PWARegister";
+import { PostHogProvider } from "@/components/PostHogProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -50,23 +51,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="antialiased bg-background text-text-primary">
-        {children}
-        <PWARegister />
-        <Analytics />
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: {
-              background: "#1a1a24",
-              color: "#f0f0f8",
-              border: "1px solid #2a2a3a",
-              borderRadius: "12px",
-              fontSize: "14px",
-            },
-            success: { iconTheme: { primary: "#00e676", secondary: "#0a0a0f" } },
-            error: { iconTheme: { primary: "#ff4444", secondary: "#0a0a0f" } },
-          }}
-        />
+        <PostHogProvider>
+          {children}
+          <PWARegister />
+          <Analytics />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: "#1a1a24",
+                color: "#f0f0f8",
+                border: "1px solid #2a2a3a",
+                borderRadius: "12px",
+                fontSize: "14px",
+              },
+              success: { iconTheme: { primary: "#00e676", secondary: "#0a0a0f" } },
+              error: { iconTheme: { primary: "#ff4444", secondary: "#0a0a0f" } },
+            }}
+          />
+        </PostHogProvider>
       </body>
     </html>
   );
