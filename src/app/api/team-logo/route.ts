@@ -2,17 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 
 // ── football-data.org ────────────────────────────────────────────────────────
 const FOOTBALL_DATA_KEY = process.env.FOOTBALL_DATA_API_KEY ?? "";
-const FD_OPTS = {
+const fdOpts = () => ({
   headers: { "X-Auth-Token": FOOTBALL_DATA_KEY },
   next: { revalidate: 86400 },
   signal: AbortSignal.timeout(8_000),
-};
+});
 const FD_COMPETITIONS = ["PD", "PL", "BL1", "SA", "FL1", "CL", "EL", "PPL", "DED", "ELC"];
 
 interface FDTeam { name: string; shortName: string; tla: string; crest: string; }
 
 // ── ESPN (no auth needed) ────────────────────────────────────────────────────
-const ESPN_OPTS = { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8_000) };
+const espnOpts = () => ({ next: { revalidate: 86400 }, signal: AbortSignal.timeout(8_000) });
 
 const ESPN_BY_SPORT: Record<string, { sport: string; league: string }[]> = {
   football: [
@@ -72,6 +72,20 @@ const TEAM_ALIASES: Record<string, string[]> = {
   "leicester":             ["leicester city"],
   "nottingham forest":     ["nottingham forest"],
   "sheffield united":      ["sheffield utd"],
+  "athletic bilbao":       ["athletic club", "athletic club de bilbao"],
+  "athletic club bilbao":  ["athletic club"],
+  "real sociedad":         ["real sociedad de fútbol"],
+  "deportivo alaves":      ["deportivo alavés", "alaves"],
+  "rayo vallecano":        ["rayo vallecano de madrid"],
+  "villarreal":            ["villarreal cf"],
+  "sevilla":               ["sevilla fc"],
+  "valencia":              ["valencia cf"],
+  "osasuna":               ["ca osasuna"],
+  "getafe":                ["getafe cf"],
+  "girona":                ["girona fc"],
+  "las palmas":            ["ud las palmas"],
+  "mallorca":              ["rcd mallorca"],
+  "espanyol":              ["rcd espanyol"],
 };
 
 function resolveAliases(team: string): string[] {
@@ -123,7 +137,7 @@ async function footballDataLogo(team: string): Promise<string | null> {
   const queries = resolveAliases(team);
   for (const comp of FD_COMPETITIONS) {
     try {
-      const res = await fetch(`https://api.football-data.org/v4/competitions/${comp}/teams`, FD_OPTS);
+      const res = await fetch(`https://api.football-data.org/v4/competitions/${comp}/teams`, fdOpts());
       if (!res.ok) continue;
       const teams = (await res.json())?.teams as FDTeam[] ?? [];
       for (const q of queries) {
@@ -149,7 +163,7 @@ async function espnLeagueLogo(sport: string, league: string, team: string): Prom
   try {
     const res = await fetch(
       `https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/teams?limit=200`,
-      ESPN_OPTS
+      espnOpts()
     );
     if (!res.ok) return null;
     const found = extractEspnTeams(await res.json()).find((t) => matches(t.name, t.short, t.abbr, team));
@@ -184,7 +198,7 @@ async function espnTennisPhoto(playerName: string): Promise<string | null> {
     try {
       const listRes = await fetch(
         `https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/athletes?limit=500&active=true`,
-        ESPN_OPTS
+        espnOpts()
       );
       if (!listRes.ok) { console.log(`[tennis] ${league} list ${listRes.status}`); continue; }
       const data = await listRes.json();
@@ -206,7 +220,7 @@ async function espnTennisPhoto(playerName: string): Promise<string | null> {
       if (found.id) {
         const detailRes = await fetch(
           `https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/athletes/${found.id}`,
-          ESPN_OPTS
+          espnOpts()
         );
         if (detailRes.ok) {
           const detail = await detailRes.json();
