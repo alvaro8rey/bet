@@ -186,38 +186,16 @@ async function espnLogo(team: string, appSport: string): Promise<string | null> 
 }
 
 // ── ESPN tennis athlete lookup ───────────────────────────────────────────────
-async function espnTennisPhoto(playerName: string): Promise<string | null> {
+async function tennisPhotoFromScoreboard(playerName: string, league: string): Promise<string | null> {
   const q = clean(playerName);
-
-  // 1. Try ESPN search endpoint (works regardless of live matches)
-  try {
-    const res = await fetch(
-      `https://site.web.api.espn.com/apis/common/v3/search?query=${encodeURIComponent(playerName)}&type=athlete&sport=tennis&limit=5`,
-      espnOpts()
-    );
-    console.log(`[tennis] search status=${res.status}`);
-    if (res.ok) {
-      const data = await res.json();
-      const results: any[] = data?.results ?? [];
-      for (const r of results) {
-        const athlete = r?.athlete ?? r?.data?.athlete ?? r;
-        const name = clean(athlete?.displayName ?? athlete?.name ?? "");
-        if (name === q || name.includes(q)) {
-          const img = athlete?.headshot?.href ?? athlete?.flag?.href ?? r?.displayImage?.href;
-          if (img) { console.log(`[tennis] search hit: ${img}`); return img; }
-        }
-      }
-      console.log(`[tennis] search miss, results=${JSON.stringify(results.slice(0,2))}`);
-    }
-  } catch (e) { console.log(`[tennis] search error: ${e}`); }
-
-  // 2. Fallback: check scoreboard for live matches
-  for (const league of ["atp", "wta"]) {
+  const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const urls = [
+    `https://site.api.espn.com/apis/site/v2/sports/tennis/${league}/scoreboard?dates=${today}`,
+    `https://site.api.espn.com/apis/site/v2/sports/tennis/${league}/scoreboard`,
+  ];
+  for (const url of urls) {
     try {
-      const res = await fetch(
-        `https://site.api.espn.com/apis/site/v2/sports/tennis/${league}/scoreboard`,
-        espnOpts()
-      );
+      const res = await fetch(url, espnOpts());
       if (!res.ok) continue;
       const events: any[] = (await res.json())?.events ?? [];
       for (const event of events) {
@@ -227,12 +205,54 @@ async function espnTennisPhoto(playerName: string): Promise<string | null> {
           const name = clean(athlete.displayName ?? athlete.fullName ?? "");
           if (name === q || name.includes(q)) {
             const img = athlete.headshot?.href ?? athlete.flag?.href;
-            if (img) { console.log(`[tennis] scoreboard hit: ${img}`); return img; }
+            if (img) return img;
           }
         }
       }
-    } catch (e) { console.log(`[tennis] scoreboard ${league} error: ${e}`); }
+    } catch { /* continue */ }
   }
+  return null;
+}
+
+async function tennisPhotoFromSofascore(playerName: string): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `https://api.sofascore.com/api/v1/search/all?q=${encodeURIComponent(playerName)}`,
+      {
+        headers: { "User-Agent": "Mozilla/5.0", "Accept": "application/json" },
+        next: { revalidate: 86400 },
+        signal: AbortSignal.timeout(8_000),
+      }
+    );
+    console.log(`[tennis] sofascore status=${res.status}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const players: any[] = data?.players ?? [];
+    const q = clean(playerName);
+    for (const p of players) {
+      const name = clean(p?.player?.name ?? "");
+      if (name === q || name.includes(q)) {
+        const id = p?.player?.id;
+        const country = p?.player?.country?.alpha2?.toLowerCase();
+        console.log(`[tennis] sofascore found id=${id} country=${country}`);
+        if (id) return `https://api.sofascore.com/api/v1/player/${id}/image`;
+        if (country) return `https://api.sofascore.com/api/v1/static/images/flags/${country}.png`;
+      }
+    }
+  } catch (e) { console.log(`[tennis] sofascore error: ${e}`); }
+  return null;
+}
+
+async function espnTennisPhoto(playerName: string): Promise<string | null> {
+  // 1. ESPN scoreboard (today's matches including scheduled)
+  for (const league of ["atp", "wta"]) {
+    const img = await tennisPhotoFromScoreboard(playerName, league);
+    if (img) { console.log(`[tennis] espn hit for "${playerName}"`); return img; }
+  }
+
+  // 2. SofaScore
+  const img = await tennisPhotoFromSofascore(playerName);
+  if (img) return img;
 
   console.log(`[tennis] no result for "${playerName}"`);
   return null;
