@@ -219,20 +219,16 @@ async function espnTennisPhoto(playerName: string): Promise<string | null> {
       `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`,
       { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8_000) }
     );
-    console.log(`[tennis] wiki ${res.status} for "${playerName}"`);
     if (res.ok) {
       const data = await res.json();
       const desc = (data?.description ?? "").toLowerCase();
-      console.log(`[tennis] wiki desc="${desc}"`);
       for (const [nationality, code] of Object.entries(NATIONALITY_TO_FLAG)) {
         if (desc.includes(nationality)) {
-          console.log(`[tennis] flag match: ${nationality} → ${code}`);
           return `https://a.espncdn.com/i/teamlogos/countries/500/${code}.png`;
         }
       }
-      console.log(`[tennis] no nationality match in desc`);
     }
-  } catch (e) { console.log(`[tennis] wiki error: ${e}`); }
+  } catch { /* continue */ }
 
   // 2. ESPN scoreboard fallback — flag from live/today matches
   const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
@@ -270,23 +266,18 @@ export async function GET(req: NextRequest) {
   const sport = req.nextUrl.searchParams.get("sport") ?? "other";
   if (!team) return NextResponse.json({ url: null });
 
-  console.log(`[team-logo] team="${team}" sport="${sport}"`);
-
   if (sport === "tennis") {
     const photo = await espnTennisPhoto(team);
-    console.log(`[team-logo] tennis result: ${photo}`);
     return NextResponse.json({ url: photo });
   }
 
   if (sport === "football") {
     const fdLogo = await footballDataLogo(team);
-    if (fdLogo) { console.log(`[team-logo] fd hit: ${fdLogo}`); return NextResponse.json({ url: fdLogo }); }
-    console.log(`[team-logo] fd miss for "${team}"`);
+    if (fdLogo) return NextResponse.json({ url: fdLogo });
   }
 
   const eLogo = await espnLogo(team, sport);
-  if (eLogo) { console.log(`[team-logo] espn hit: ${eLogo}`); return NextResponse.json({ url: eLogo }); }
-  console.log(`[team-logo] espn miss for "${team}" sport="${sport}"`);
+  if (eLogo) return NextResponse.json({ url: eLogo });
 
   if (sport !== "football") {
     const fdLogo = await footballDataLogo(team);
