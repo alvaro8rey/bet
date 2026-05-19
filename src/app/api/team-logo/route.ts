@@ -237,10 +237,6 @@ async function espnTennisPhoto(playerName: string): Promise<string | null> {
     console.log(`[tennis] wiki status=${res.status} for "${playerName}"`);
     if (res.ok) {
       const data = await res.json();
-      if (data?.thumbnail?.source) {
-        console.log(`[tennis] wiki photo found`);
-        return data.thumbnail.source;
-      }
       // Extract nationality from description e.g. "French professional tennis player"
       const desc = (data?.description ?? data?.extract ?? "").toLowerCase();
       for (const [nationality, code] of Object.entries(NATIONALITY_TO_FLAG)) {
