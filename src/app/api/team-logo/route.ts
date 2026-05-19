@@ -198,6 +198,17 @@ const NATIONALITY_TO_FLAG: Record<string, string> = {
   japanese: "jpn", "south korean": "kor", korean: "kor", chinese: "chn", taiwanese: "tpe",
   brazilian: "bra", mexican: "mex", colombian: "col", "south african": "rsa",
   swedish: "swe", portuguese: "por", turkish: "tur", georgian: "geo",
+  bosnian: "bih", "herzegovinian": "bih", slovenian: "slo", macedonian: "mkd",
+  montenegrin: "mne", albanian: "alb", moldovan: "mda", uzbek: "uzb",
+  armenian: "arm", azerbaijani: "aze", tunisian: "tun", moroccan: "mar",
+  egyptian: "egy", "south african": "rsa", zimbabwean: "zim",
+  peruvian: "per", ecuadorian: "ecu", venezuelan: "ven", paraguayan: "par",
+  bolivian: "bol", uruguayan: "uru", trinidadian: "tto",
+  thai: "tha", indonesian: "ina", philippine: "phi", vietnamese: "vie",
+  indian: "ind", pakistani: "pak", "sri lankan": "slk",
+  iraqi: "irq", iranian: "iri", israeli: "isr", jordanian: "jor",
+  luxembourgish: "lux", monégasque: "mon", icelandic: "isl",
+  cypriot: "cyp", maltese: "mlt", liechtenstein: "lie",
 };
 
 async function espnTennisPhoto(playerName: string): Promise<string | null> {
@@ -205,7 +216,7 @@ async function espnTennisPhoto(playerName: string): Promise<string | null> {
   try {
     const slug = playerName.trim().replace(/ /g, "_");
     const res = await fetch(
-      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`,
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}?redirect=true`,
       { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8_000) }
     );
     if (res.ok) {
