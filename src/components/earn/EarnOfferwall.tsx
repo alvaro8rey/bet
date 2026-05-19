@@ -18,8 +18,6 @@ interface EarnOfferwallProps {
   theoremReachUserId?: string;
   bitlabsAppToken?: string;
   bitlabsUserId?: string;
-  adgemAppId?: string;
-  adgemUserId?: string;
 }
 
 export function EarnOfferwall({
@@ -30,8 +28,6 @@ export function EarnOfferwall({
   theoremReachUserId,
   bitlabsAppToken,
   bitlabsUserId,
-  adgemAppId,
-  adgemUserId,
 }: EarnOfferwallProps) {
   const [activeTab, setActiveTab] = useState(0);
   const [loaded, setLoaded] = useState<Record<number, boolean>>({});
@@ -62,16 +58,7 @@ export function EarnOfferwall({
     });
   }
 
-  if (adgemAppId && adgemUserId) {
-    walls.push({
-      id: "adgem",
-      label: "AdGem",
-      url: `https://adunits.adgem.com/wall?appid=${adgemAppId}&playerid=${adgemUserId.replace(/-/g, "")}`,
-      mobileOnly: true,
-    });
-  }
-
-  if (walls.length === 0) return null;
+if (walls.length === 0) return null;
 
   const current = walls[activeTab];
 
