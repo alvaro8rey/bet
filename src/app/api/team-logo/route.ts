@@ -187,33 +187,51 @@ async function espnLogo(team: string, appSport: string): Promise<string | null> 
 
 // ── ESPN tennis athlete lookup ───────────────────────────────────────────────
 async function espnTennisPhoto(playerName: string): Promise<string | null> {
-  const tours = ["atp", "wta"];
   const q = clean(playerName);
 
-  for (const league of tours) {
+  // 1. Try ESPN search endpoint (works regardless of live matches)
+  try {
+    const res = await fetch(
+      `https://site.web.api.espn.com/apis/common/v3/search?query=${encodeURIComponent(playerName)}&type=athlete&sport=tennis&limit=5`,
+      espnOpts()
+    );
+    console.log(`[tennis] search status=${res.status}`);
+    if (res.ok) {
+      const data = await res.json();
+      const results: any[] = data?.results ?? [];
+      for (const r of results) {
+        const athlete = r?.athlete ?? r?.data?.athlete ?? r;
+        const name = clean(athlete?.displayName ?? athlete?.name ?? "");
+        if (name === q || name.includes(q)) {
+          const img = athlete?.headshot?.href ?? athlete?.flag?.href ?? r?.displayImage?.href;
+          if (img) { console.log(`[tennis] search hit: ${img}`); return img; }
+        }
+      }
+      console.log(`[tennis] search miss, results=${JSON.stringify(results.slice(0,2))}`);
+    }
+  } catch (e) { console.log(`[tennis] search error: ${e}`); }
+
+  // 2. Fallback: check scoreboard for live matches
+  for (const league of ["atp", "wta"]) {
     try {
       const res = await fetch(
         `https://site.api.espn.com/apis/site/v2/sports/tennis/${league}/scoreboard`,
         espnOpts()
       );
       if (!res.ok) continue;
-
-      const data = await res.json();
-      const events: any[] = data?.events ?? [];
-
+      const events: any[] = (await res.json())?.events ?? [];
       for (const event of events) {
-        const competitors: any[] = event?.competitions?.[0]?.competitors ?? [];
-        for (const competitor of competitors) {
+        for (const competitor of event?.competitions?.[0]?.competitors ?? []) {
           const athlete = competitor?.athlete;
           if (!athlete) continue;
           const name = clean(athlete.displayName ?? athlete.fullName ?? "");
           if (name === q || name.includes(q)) {
-            if (athlete.headshot?.href) return athlete.headshot.href;
-            if (athlete.flag?.href) return athlete.flag.href;
+            const img = athlete.headshot?.href ?? athlete.flag?.href;
+            if (img) { console.log(`[tennis] scoreboard hit: ${img}`); return img; }
           }
         }
       }
-    } catch (e) { console.log(`[tennis] ${league} scoreboard error: ${e}`); }
+    } catch (e) { console.log(`[tennis] scoreboard ${league} error: ${e}`); }
   }
 
   console.log(`[tennis] no result for "${playerName}"`);
