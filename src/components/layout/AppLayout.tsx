@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Navbar } from "./Navbar";
 import { Sidebar } from "./Sidebar";
 import { BottomNav } from "./BottomNav";
-import { AdsterraUnit } from "@/components/ads/AdsterraUnit";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -14,9 +13,6 @@ const LEGAL_LINKS = [
   { href: "/contact", label: "Contacto" },
   { href: "/como-ganar-puntos", label: "Cómo ganar puntos" },
 ];
-
-const ADSTERRA_300x250 = "789b5ee37dbebca06e32b1d84247c967";
-const ADSTERRA_320x50  = "dae339dd05e406edbd65799672f60e96";
 
 export function AppLayout({ children }: AppLayoutProps) {
   return (
@@ -38,23 +34,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             ))}
           </div>
         </main>
-
-        {/* Right ad column — desktop only */}
-        {ADSTERRA_300x250 && (
-          <aside className="hidden lg:flex flex-col w-[300px] flex-shrink-0 pt-6 pr-4">
-            <div className="sticky top-20">
-              <AdsterraUnit adKey={ADSTERRA_300x250} width={300} height={250} />
-            </div>
-          </aside>
-        )}
       </div>
-
-      {/* Mobile banner — 320x50 above bottom nav */}
-      {ADSTERRA_320x50 && (
-        <div className="lg:hidden flex justify-center bg-background border-t border-border/50">
-          <AdsterraUnit adKey={ADSTERRA_320x50} width={320} height={50} />
-        </div>
-      )}
 
       <BottomNav />
     </div>
