@@ -186,73 +186,72 @@ async function espnLogo(team: string, appSport: string): Promise<string | null> 
 }
 
 // ── ESPN tennis athlete lookup ───────────────────────────────────────────────
-async function tennisPhotoFromScoreboard(playerName: string, league: string): Promise<string | null> {
-  const q = clean(playerName);
-  const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  const urls = [
-    `https://site.api.espn.com/apis/site/v2/sports/tennis/${league}/scoreboard?dates=${today}`,
-    `https://site.api.espn.com/apis/site/v2/sports/tennis/${league}/scoreboard`,
-  ];
-  for (const url of urls) {
-    try {
-      const res = await fetch(url, espnOpts());
-      if (!res.ok) continue;
-      const events: any[] = (await res.json())?.events ?? [];
-      for (const event of events) {
-        for (const competitor of event?.competitions?.[0]?.competitors ?? []) {
-          const athlete = competitor?.athlete;
-          if (!athlete) continue;
-          const name = clean(athlete.displayName ?? athlete.fullName ?? "");
-          if (name === q || name.includes(q)) {
-            const img = athlete.headshot?.href ?? athlete.flag?.href;
-            if (img) return img;
-          }
-        }
-      }
-    } catch { /* continue */ }
-  }
-  return null;
-}
-
-async function tennisPhotoFromSofascore(playerName: string): Promise<string | null> {
-  try {
-    const res = await fetch(
-      `https://api.sofascore.com/api/v1/search/all?q=${encodeURIComponent(playerName)}`,
-      {
-        headers: { "User-Agent": "Mozilla/5.0", "Accept": "application/json" },
-        next: { revalidate: 86400 },
-        signal: AbortSignal.timeout(8_000),
-      }
-    );
-    console.log(`[tennis] sofascore status=${res.status}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const players: any[] = data?.players ?? [];
-    const q = clean(playerName);
-    for (const p of players) {
-      const name = clean(p?.player?.name ?? "");
-      if (name === q || name.includes(q)) {
-        const id = p?.player?.id;
-        const country = p?.player?.country?.alpha2?.toLowerCase();
-        console.log(`[tennis] sofascore found id=${id} country=${country}`);
-        if (id) return `https://api.sofascore.com/api/v1/player/${id}/image`;
-        if (country) return `https://api.sofascore.com/api/v1/static/images/flags/${country}.png`;
-      }
-    }
-  } catch (e) { console.log(`[tennis] sofascore error: ${e}`); }
-  return null;
-}
+// ── nationality → ESPN flag code (sports conventions differ from ISO) ────────
+const NATIONALITY_TO_FLAG: Record<string, string> = {
+  french: "fra", spanish: "esp", italian: "ita", american: "usa", german: "ger",
+  serbian: "srb", greek: "gre", norwegian: "nor", australian: "aus", british: "gbr",
+  canadian: "can", argentine: "arg", chilean: "chi", czech: "cze", polish: "pol",
+  danish: "den", finnish: "fin", swiss: "sui", dutch: "ned", belgian: "bel",
+  russian: "rus", kazakh: "kaz", ukrainian: "ukr", belarusian: "blr",
+  croatian: "cro", bulgarian: "bul", romanian: "rou", hungarian: "hun",
+  slovak: "svk", austrian: "aut", estonian: "est", latvian: "lat", lithuanian: "ltu",
+  japanese: "jpn", "south korean": "kor", korean: "kor", chinese: "chn", taiwanese: "tpe",
+  brazilian: "bra", mexican: "mex", colombian: "col", "south african": "rsa",
+  swedish: "swe", portuguese: "por", turkish: "tur", georgian: "geo",
+};
 
 async function espnTennisPhoto(playerName: string): Promise<string | null> {
-  // 1. ESPN scoreboard (today's matches including scheduled)
+  // 1. ESPN scoreboard (today's matches + live)
+  const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const q = clean(playerName);
   for (const league of ["atp", "wta"]) {
-    const img = await tennisPhotoFromScoreboard(playerName, league);
-    if (img) { console.log(`[tennis] espn hit for "${playerName}"`); return img; }
+    for (const url of [
+      `https://site.api.espn.com/apis/site/v2/sports/tennis/${league}/scoreboard?dates=${today}`,
+      `https://site.api.espn.com/apis/site/v2/sports/tennis/${league}/scoreboard`,
+    ]) {
+      try {
+        const res = await fetch(url, espnOpts());
+        if (!res.ok) continue;
+        for (const event of (await res.json())?.events ?? []) {
+          for (const competitor of event?.competitions?.[0]?.competitors ?? []) {
+            const athlete = competitor?.athlete;
+            if (!athlete) continue;
+            const name = clean(athlete.displayName ?? athlete.fullName ?? "");
+            if (name === q || name.includes(q)) {
+              const img = athlete.headshot?.href ?? athlete.flag?.href;
+              if (img) return img;
+            }
+          }
+        }
+      } catch { /* continue */ }
+    }
   }
 
-  // 2. SofaScore
-  const img = await tennisPhotoFromSofascore(playerName);
-  if (img) return img;
+  // 2. Wikipedia — photo + nationality flag fallback
+  try {
+    const slug = playerName.trim().replace(/ /g, "_");
+    const res = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`,
+      { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8_000) }
+    );
+    console.log(`[tennis] wiki status=${res.status} for "${playerName}"`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.thumbnail?.source) {
+        console.log(`[tennis] wiki photo found`);
+        return data.thumbnail.source;
+      }
+      // Extract nationality from description e.g. "French professional tennis player"
+      const desc = (data?.description ?? data?.extract ?? "").toLowerCase();
+      for (const [nationality, code] of Object.entries(NATIONALITY_TO_FLAG)) {
+        if (desc.includes(nationality)) {
+          const flagUrl = `https://a.espncdn.com/i/teamlogos/countries/500/${code}.png`;
+          console.log(`[tennis] wiki flag: ${nationality} → ${flagUrl}`);
+          return flagUrl;
+        }
+      }
+    }
+  } catch (e) { console.log(`[tennis] wiki error: ${e}`); }
 
   console.log(`[tennis] no result for "${playerName}"`);
   return null;
