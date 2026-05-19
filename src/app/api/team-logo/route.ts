@@ -216,19 +216,23 @@ async function espnTennisPhoto(playerName: string): Promise<string | null> {
   try {
     const slug = playerName.trim().replace(/ /g, "_");
     const res = await fetch(
-      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}?redirect=true`,
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`,
       { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8_000) }
     );
+    console.log(`[tennis] wiki ${res.status} for "${playerName}"`);
     if (res.ok) {
       const data = await res.json();
-      const desc = (data?.description ?? data?.extract ?? "").toLowerCase();
+      const desc = (data?.description ?? "").toLowerCase();
+      console.log(`[tennis] wiki desc="${desc}"`);
       for (const [nationality, code] of Object.entries(NATIONALITY_TO_FLAG)) {
         if (desc.includes(nationality)) {
+          console.log(`[tennis] flag match: ${nationality} → ${code}`);
           return `https://a.espncdn.com/i/teamlogos/countries/500/${code}.png`;
         }
       }
+      console.log(`[tennis] no nationality match in desc`);
     }
-  } catch { /* continue */ }
+  } catch (e) { console.log(`[tennis] wiki error: ${e}`); }
 
   // 2. ESPN scoreboard fallback — flag from live/today matches
   const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
