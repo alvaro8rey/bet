@@ -201,7 +201,25 @@ const NATIONALITY_TO_FLAG: Record<string, string> = {
 };
 
 async function espnTennisPhoto(playerName: string): Promise<string | null> {
-  // 1. ESPN scoreboard (today's matches + live)
+  // 1. Wikipedia — nationality flag (always preferred, consistent look)
+  try {
+    const slug = playerName.trim().replace(/ /g, "_");
+    const res = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`,
+      { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8_000) }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      const desc = (data?.description ?? data?.extract ?? "").toLowerCase();
+      for (const [nationality, code] of Object.entries(NATIONALITY_TO_FLAG)) {
+        if (desc.includes(nationality)) {
+          return `https://a.espncdn.com/i/teamlogos/countries/500/${code}.png`;
+        }
+      }
+    }
+  } catch { /* continue */ }
+
+  // 2. ESPN scoreboard fallback — flag from live/today matches
   const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
   const q = clean(playerName);
   for (const league of ["atp", "wta"]) {
@@ -218,36 +236,14 @@ async function espnTennisPhoto(playerName: string): Promise<string | null> {
             if (!athlete) continue;
             const name = clean(athlete.displayName ?? athlete.fullName ?? "");
             if (name === q || name.includes(q)) {
-              const img = athlete.headshot?.href ?? athlete.flag?.href;
-              if (img) return img;
+              // Only return flag, not headshot
+              if (athlete.flag?.href) return athlete.flag.href;
             }
           }
         }
       } catch { /* continue */ }
     }
   }
-
-  // 2. Wikipedia — photo + nationality flag fallback
-  try {
-    const slug = playerName.trim().replace(/ /g, "_");
-    const res = await fetch(
-      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`,
-      { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8_000) }
-    );
-    console.log(`[tennis] wiki status=${res.status} for "${playerName}"`);
-    if (res.ok) {
-      const data = await res.json();
-      // Extract nationality from description e.g. "French professional tennis player"
-      const desc = (data?.description ?? data?.extract ?? "").toLowerCase();
-      for (const [nationality, code] of Object.entries(NATIONALITY_TO_FLAG)) {
-        if (desc.includes(nationality)) {
-          const flagUrl = `https://a.espncdn.com/i/teamlogos/countries/500/${code}.png`;
-          console.log(`[tennis] wiki flag: ${nationality} → ${flagUrl}`);
-          return flagUrl;
-        }
-      }
-    }
-  } catch (e) { console.log(`[tennis] wiki error: ${e}`); }
 
   console.log(`[tennis] no result for "${playerName}"`);
   return null;
