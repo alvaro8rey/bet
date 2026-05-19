@@ -196,7 +196,7 @@ const NATIONALITY_TO_FLAG: Record<string, string> = {
   croatian: "cro", bulgarian: "bul", romanian: "rou", hungarian: "hun",
   slovak: "svk", austrian: "aut", estonian: "est", latvian: "lat", lithuanian: "ltu",
   japanese: "jpn", "south korean": "kor", korean: "kor", chinese: "chn", taiwanese: "tpe",
-  brazilian: "bra", mexican: "mex", colombian: "col", "south african": "rsa",
+  brazilian: "bra", mexican: "mex", colombian: "col",
   swedish: "swe", portuguese: "por", turkish: "tur", georgian: "geo",
   bosnian: "bih", "herzegovinian": "bih", slovenian: "slo", macedonian: "mkd",
   montenegrin: "mne", albanian: "alb", moldovan: "mda", uzbek: "uzb",
