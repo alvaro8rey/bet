@@ -52,7 +52,6 @@ const ESPN_BY_SPORT: Record<string, { sport: string; league: string }[]> = {
 };
 
 // ── team name aliases ─────────────────────────────────────────────────────────
-// Maps names used by The Odds API to the names used by ESPN / football-data.org
 const TEAM_ALIASES: Record<string, string[]> = {
   "sporting lisbon":       ["sporting cp", "sporting clube de portugal"],
   "paris saint-germain":   ["paris sg", "psg"],
@@ -92,13 +91,6 @@ function tokenize(s: string): string[] {
   return s.toLowerCase().split(/\s+/).filter((w) => w.length >= 2 && !STOPWORDS.has(w));
 }
 
-/**
- * Bidirectional word match:
- *   1. Every word in `query` must appear (accent-stripped) inside `apiName`.
- *   2. Every significant (non-qualifier) word of `apiName` must appear inside `query`.
- * This prevents "Paris FC" from matching "Paris Saint-Germain" and
- * "Sporting CP" from matching "Sporting Gijón".
- */
 function wordMatches(apiName: string, query: string): boolean {
   const qWords = tokenize(query);
   const nWords = tokenize(apiName);
@@ -118,6 +110,9 @@ function matches(name: string, short: string, abbr: string, query: string): bool
   if (q.length < 2) return false;
 
   if (clean(name) === q || clean(short) === q || clean(abbr) === q) return true;
+
+  // Partial match: query fully contained in name or vice versa
+  if (clean(name).includes(q) || q.includes(clean(name))) return true;
 
   return wordMatches(name, query) || wordMatches(short, query);
 }
@@ -140,7 +135,7 @@ async function footballDataLogo(team: string): Promise<string | null> {
   return null;
 }
 
-// ── ESPN lookup ──────────────────────────────────────────────────────────────
+// ── ESPN team lookup ─────────────────────────────────────────────────────────
 function extractEspnTeams(d: unknown): { name: string; short: string; abbr: string; logo: string }[] {
   const raw = (d as any)?.sports?.[0]?.leagues?.[0]?.teams ?? (d as any)?.teams ?? [];
   return (raw as any[]).flatMap((item: any) => {
@@ -176,11 +171,48 @@ async function espnLogo(team: string, appSport: string): Promise<string | null> 
   return null;
 }
 
+// ── ESPN tennis athlete lookup ───────────────────────────────────────────────
+async function espnTennisPhoto(playerName: string): Promise<string | null> {
+  const tours = [
+    { sport: "tennis", league: "atp" },
+    { sport: "tennis", league: "wta" },
+  ];
+
+  for (const { sport, league } of tours) {
+    try {
+      const res = await fetch(
+        `https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/athletes?limit=500&active=true`,
+        ESPN_OPTS
+      );
+      if (!res.ok) continue;
+      const data = await res.json();
+      const athletes: any[] = data?.athletes ?? data?.items ?? [];
+
+      const q = clean(playerName);
+      const found = athletes.find((a: any) => {
+        const name = clean(a.displayName ?? a.fullName ?? a.name ?? "");
+        const last = clean(a.lastName ?? "");
+        return name === q || name.includes(q) || q.includes(last) && last.length > 3;
+      });
+
+      const headshot = found?.headshot?.href ?? found?.flag?.href ?? null;
+      if (headshot) return headshot;
+    } catch { /* continue */ }
+  }
+  return null;
+}
+
 // ── route ────────────────────────────────────────────────────────────────────
 export async function GET(req: NextRequest) {
   const team = req.nextUrl.searchParams.get("team");
-  const sport = req.nextUrl.searchParams.get("sport") ?? "other"; // e.g. "football", "basketball"
+  const sport = req.nextUrl.searchParams.get("sport") ?? "other";
   if (!team) return NextResponse.json({ url: null });
+
+  // Tennis: look up player headshot instead of team logo
+  if (sport === "tennis") {
+    const photo = await espnTennisPhoto(team);
+    return NextResponse.json({ url: photo });
+  }
 
   // For football, try football-data.org first (better quality SVG crests)
   if (sport === "football") {
@@ -188,7 +220,7 @@ export async function GET(req: NextRequest) {
     if (fdLogo) return NextResponse.json({ url: fdLogo });
   }
 
-  // ESPN — scoped to the correct sport so basketball never searches soccer leagues
+  // ESPN — scoped to the correct sport
   const eLogo = await espnLogo(team, sport);
   if (eLogo) return NextResponse.json({ url: eLogo });
 
