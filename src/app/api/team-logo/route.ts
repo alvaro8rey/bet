@@ -182,14 +182,14 @@ async function espnTennisPhoto(playerName: string): Promise<string | null> {
 
   for (const { sport, league } of tours) {
     try {
-      // Step 1: find athlete in list to get ID
       const listRes = await fetch(
         `https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/athletes?limit=500&active=true`,
         ESPN_OPTS
       );
-      if (!listRes.ok) continue;
+      if (!listRes.ok) { console.log(`[tennis] ${league} list ${listRes.status}`); continue; }
       const data = await listRes.json();
       const athletes: any[] = data?.athletes ?? data?.items ?? [];
+      console.log(`[tennis] ${league} — ${athletes.length} athletes, query="${q}"`);
 
       const found = athletes.find((a: any) => {
         const name = clean(a.displayName ?? a.fullName ?? a.name ?? "");
@@ -197,13 +197,12 @@ async function espnTennisPhoto(playerName: string): Promise<string | null> {
         return name === q || name.includes(q) || (last.length > 3 && q.includes(last));
       });
 
-      if (!found) continue;
+      if (!found) { console.log(`[tennis] ${league} — no match for "${playerName}"`); continue; }
+      console.log(`[tennis] found: ${found.displayName} id=${found.id} headshot=${found.headshot?.href} flag=${found.flag?.href}`);
 
-      // Try headshot/flag from list data first
       if (found.headshot?.href) return found.headshot.href;
       if (found.flag?.href) return found.flag.href;
 
-      // Step 2: fetch individual athlete detail for headshot + flag
       if (found.id) {
         const detailRes = await fetch(
           `https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/athletes/${found.id}`,
@@ -212,14 +211,19 @@ async function espnTennisPhoto(playerName: string): Promise<string | null> {
         if (detailRes.ok) {
           const detail = await detailRes.json();
           const athlete = detail?.athlete ?? detail;
+          console.log(`[tennis] detail keys: ${Object.keys(athlete).join(", ")}`);
           const headshot = athlete?.headshot?.href;
           if (headshot) return headshot;
           const flag = athlete?.flag?.href ?? athlete?.citizenship?.flag?.href;
+          console.log(`[tennis] detail headshot=${headshot} flag=${flag}`);
           if (flag) return flag;
+        } else {
+          console.log(`[tennis] detail fetch failed: ${detailRes.status}`);
         }
       }
-    } catch { /* continue */ }
+    } catch (e) { console.log(`[tennis] error: ${e}`); }
   }
+  console.log(`[tennis] no photo found for "${playerName}"`);
   return null;
 }
 
@@ -229,27 +233,29 @@ export async function GET(req: NextRequest) {
   const sport = req.nextUrl.searchParams.get("sport") ?? "other";
   if (!team) return NextResponse.json({ url: null });
 
-  // Tennis: look up player headshot instead of team logo
+  console.log(`[team-logo] team="${team}" sport="${sport}"`);
+
   if (sport === "tennis") {
     const photo = await espnTennisPhoto(team);
+    console.log(`[team-logo] tennis result: ${photo}`);
     return NextResponse.json({ url: photo });
   }
 
-  // For football, try football-data.org first (better quality SVG crests)
   if (sport === "football") {
     const fdLogo = await footballDataLogo(team);
-    if (fdLogo) return NextResponse.json({ url: fdLogo });
+    if (fdLogo) { console.log(`[team-logo] fd hit: ${fdLogo}`); return NextResponse.json({ url: fdLogo }); }
+    console.log(`[team-logo] fd miss for "${team}"`);
   }
 
-  // ESPN — scoped to the correct sport
   const eLogo = await espnLogo(team, sport);
-  if (eLogo) return NextResponse.json({ url: eLogo });
+  if (eLogo) { console.log(`[team-logo] espn hit: ${eLogo}`); return NextResponse.json({ url: eLogo }); }
+  console.log(`[team-logo] espn miss for "${team}" sport="${sport}"`);
 
-  // Non-football fallback: try football-data.org last
   if (sport !== "football") {
     const fdLogo = await footballDataLogo(team);
     if (fdLogo) return NextResponse.json({ url: fdLogo });
   }
 
+  console.log(`[team-logo] no result for "${team}"`);
   return NextResponse.json({ url: null });
 }
