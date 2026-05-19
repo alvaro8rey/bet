@@ -178,25 +178,46 @@ async function espnTennisPhoto(playerName: string): Promise<string | null> {
     { sport: "tennis", league: "wta" },
   ];
 
+  const q = clean(playerName);
+
   for (const { sport, league } of tours) {
     try {
-      const res = await fetch(
+      // Step 1: find athlete in list to get ID
+      const listRes = await fetch(
         `https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/athletes?limit=500&active=true`,
         ESPN_OPTS
       );
-      if (!res.ok) continue;
-      const data = await res.json();
+      if (!listRes.ok) continue;
+      const data = await listRes.json();
       const athletes: any[] = data?.athletes ?? data?.items ?? [];
 
-      const q = clean(playerName);
       const found = athletes.find((a: any) => {
         const name = clean(a.displayName ?? a.fullName ?? a.name ?? "");
         const last = clean(a.lastName ?? "");
-        return name === q || name.includes(q) || q.includes(last) && last.length > 3;
+        return name === q || name.includes(q) || (last.length > 3 && q.includes(last));
       });
 
-      const headshot = found?.headshot?.href ?? found?.flag?.href ?? null;
-      if (headshot) return headshot;
+      if (!found) continue;
+
+      // Try headshot/flag from list data first
+      if (found.headshot?.href) return found.headshot.href;
+      if (found.flag?.href) return found.flag.href;
+
+      // Step 2: fetch individual athlete detail for headshot + flag
+      if (found.id) {
+        const detailRes = await fetch(
+          `https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/athletes/${found.id}`,
+          ESPN_OPTS
+        );
+        if (detailRes.ok) {
+          const detail = await detailRes.json();
+          const athlete = detail?.athlete ?? detail;
+          const headshot = athlete?.headshot?.href;
+          if (headshot) return headshot;
+          const flag = athlete?.flag?.href ?? athlete?.citizenship?.flag?.href;
+          if (flag) return flag;
+        }
+      }
     } catch { /* continue */ }
   }
   return null;
