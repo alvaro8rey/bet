@@ -193,48 +193,27 @@ async function espnTennisPhoto(playerName: string): Promise<string | null> {
   for (const league of tours) {
     try {
       const res = await fetch(
-        `https://site.api.espn.com/apis/site/v2/sports/tennis/${league}/rankings`,
+        `https://site.api.espn.com/apis/site/v2/sports/tennis/${league}/scoreboard`,
         espnOpts()
       );
-      console.log(`[tennis] ${league}/rankings status=${res.status}`);
       if (!res.ok) continue;
 
       const data = await res.json();
-      console.log(`[tennis] ${league}/rankings top-keys=${Object.keys(data).join(",")}`);
+      const events: any[] = data?.events ?? [];
 
-      const entries: any[] = data?.rankings?.[0]?.athletes ?? data?.athletes ?? data?.items ?? [];
-      console.log(`[tennis] ${league} entries=${entries.length}`);
-
-      const found = entries.find((a: any) => {
-        const athlete = a?.athlete ?? a;
-        const name = clean(athlete.displayName ?? athlete.fullName ?? athlete.name ?? "");
-        const last = clean(athlete.lastName ?? "");
-        return name === q || name.includes(q) || (last.length > 3 && q.includes(last));
-      });
-
-      if (!found) { console.log(`[tennis] ${league} no match for "${playerName}"`); continue; }
-
-      const athlete = found?.athlete ?? found;
-      console.log(`[tennis] found ${athlete.displayName} headshot=${athlete.headshot?.href} flag=${athlete.flag?.href}`);
-
-      if (athlete.headshot?.href) return athlete.headshot.href;
-      if (athlete.flag?.href) return athlete.flag.href;
-
-      if (athlete.id) {
-        const detailRes = await fetch(
-          `https://site.api.espn.com/apis/site/v2/sports/tennis/${league}/athletes/${athlete.id}`,
-          espnOpts()
-        );
-        if (detailRes.ok) {
-          const a2 = (await detailRes.json())?.athlete ?? {};
-          console.log(`[tennis] detail keys=${Object.keys(a2).join(",")}`);
-          if (a2.headshot?.href) return a2.headshot.href;
-          if (a2.flag?.href) return a2.flag.href;
-        } else {
-          console.log(`[tennis] detail ${detailRes.status}`);
+      for (const event of events) {
+        const competitors: any[] = event?.competitions?.[0]?.competitors ?? [];
+        for (const competitor of competitors) {
+          const athlete = competitor?.athlete;
+          if (!athlete) continue;
+          const name = clean(athlete.displayName ?? athlete.fullName ?? "");
+          if (name === q || name.includes(q)) {
+            if (athlete.headshot?.href) return athlete.headshot.href;
+            if (athlete.flag?.href) return athlete.flag.href;
+          }
         }
       }
-    } catch (e) { console.log(`[tennis] ${league} error: ${e}`); }
+    } catch (e) { console.log(`[tennis] ${league} scoreboard error: ${e}`); }
   }
 
   console.log(`[tennis] no result for "${playerName}"`);
